@@ -72,14 +72,13 @@ const LIVE_BRIDGE = `
         lastStamp = stamp;
         return;
       }
-      if (stamp !== lastStamp) {
-        lastStamp = stamp;
-        if (typeof loadData === 'function' && typeof renderApp === 'function' && typeof state !== 'undefined') {
-          const chatInput = document.getElementById('chat-text-input');
-          if (!state.currentModal && state.activeTab !== 'livro' && !state.welcomeOverlay && !(chatInput && chatInput.value.trim())) {
-            await loadData();
-            renderApp();
-          }
+      if (stamp !== lastStamp && typeof loadData === 'function' && typeof renderApp === 'function' && typeof state !== 'undefined') {
+        const chatInput = document.getElementById('chat-text-input');
+        const temporarilyBlocked = !!state.currentModal || !!state.welcomeOverlay || !!(chatInput && chatInput.value.trim());
+        if (!temporarilyBlocked) {
+          await loadData();
+          renderApp();
+          lastStamp = stamp;
         }
       }
     } catch (e) {
