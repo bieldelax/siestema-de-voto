@@ -1,0 +1,2880 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Comitê de Acionamento &middot; Octafin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Cinzel:wght@600;700;800&display=swap" rel="stylesheet">
+
+<!-- Three.js para experiência 3D cinematográfica -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<style>
+  :root {
+    --deep-space: #070B14;
+    --bg-card: rgba(13, 19, 33, 0.78);
+    --bg-card-solid: #0D1321;
+    --bg-card-hover: rgba(22, 32, 54, 0.85);
+    --bg-subtle: rgba(255, 255, 255, 0.04);
+    --sidebar-bg: rgba(9, 14, 26, 0.88);
+    --border: rgba(148, 163, 184, 0.14);
+    --border-strong: rgba(148, 163, 184, 0.28);
+    --border-glow: rgba(34, 211, 238, 0.4);
+
+    --brand: #22D3EE;
+    --brand-glow: rgba(34, 211, 238, 0.35);
+    --teal: #1FBFAE;
+    --teal-dark: #128276;
+    --gold: #E4C37F;
+    --gold-light: #F7E7C4;
+    --gold-glow: rgba(228, 195, 127, 0.4);
+    --blue: #4C6FFF;
+    --blue-dark: #3753D6;
+    --purple: #8B5CF6;
+    --red: #F87171;
+    --red-soft: rgba(248, 113, 113, 0.12);
+    --green: #34D399;
+    --green-soft: rgba(52, 211, 153, 0.12);
+
+    --text: #F8FAFC;
+    --text-muted: #94A3B8;
+    --text-faint: #64748B;
+
+    --radius-lg: 18px;
+    --radius: 14px;
+    --radius-sm: 10px;
+    --radius-full: 9999px;
+
+    --shadow-subtle: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+    --shadow-card: 0 12px 36px -4px rgba(0, 0, 0, 0.65), 0 0 0 1px var(--border);
+    --shadow-glow: 0 0 28px rgba(34, 211, 238, 0.25);
+    --shadow-gold: 0 0 32px rgba(228, 195, 127, 0.3);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    width: 100%;
+    background-color: var(--deep-space);
+    color: var(--text);
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  body {
+    background-image:
+      radial-gradient(1100px 700px at 92% -10%, rgba(34, 211, 238, 0.10), transparent 60%),
+      radial-gradient(900px 600px at 5% 45%, rgba(139, 92, 246, 0.08), transparent 55%),
+      radial-gradient(1200px 800px at 50% 110%, rgba(76, 111, 255, 0.09), transparent 60%),
+      linear-gradient(180deg, #070B14 0%, #060911 100%);
+    background-attachment: fixed;
+  }
+
+  #app {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+  }
+
+  button, input, select, textarea {
+    font-family: inherit;
+    font-size: inherit;
+    outline: none;
+  }
+  button {
+    cursor: pointer;
+    transition: transform 0.14s ease, filter 0.14s ease, background 0.14s ease, border-color 0.14s ease;
+  }
+  button:active:not(:disabled) {
+    transform: scale(0.96);
+  }
+
+  /* ================== Splash Cinemático (Intro 3D) ================== */
+  .splash-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: #04060c;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.85s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.85s;
+  }
+  .splash-screen.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .splash-canvas-container {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  .splash-ui {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    pointer-events: none;
+    max-width: 580px;
+    padding: 0 24px;
+    margin-top: auto;
+    margin-bottom: 50px;
+  }
+  .splash-ui * {
+    pointer-events: auto;
+  }
+  .splash-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: rgba(34, 211, 238, 0.08);
+    border: 1px solid rgba(34, 211, 238, 0.25);
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--brand);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.2);
+  }
+  .splash-title {
+    font-family: 'Cinzel', serif;
+    font-size: 38px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.02em;
+    margin-bottom: 8px;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8), 0 0 30px rgba(228, 195, 127, 0.25);
+  }
+  .splash-sub {
+    font-size: 14.5px;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+  .splash-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .btn-unlock-splash {
+    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, #C49F57 100%);
+    color: #121824;
+    border: none;
+    font-weight: 700;
+    font-size: 14.5px;
+    padding: 13px 26px;
+    border-radius: var(--radius-full);
+    box-shadow: 0 10px 30px var(--gold-glow);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .btn-unlock-splash:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+  }
+  .btn-skip-splash {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-muted);
+    border: 1px solid var(--border-strong);
+    font-weight: 600;
+    font-size: 13.5px;
+    padding: 12px 20px;
+    border-radius: var(--radius-full);
+    backdrop-filter: blur(10px);
+  }
+  .btn-skip-splash:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+  }
+
+  /* ================== Sidebar ================== */
+  .sidebar {
+    width: 270px;
+    flex-shrink: 0;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    backdrop-filter: blur(20px);
+    display: flex;
+    flex-direction: column;
+    padding: 26px 20px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    z-index: 20;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 26px;
+  }
+  .brand-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(145deg, rgba(34, 211, 238, 0.2), rgba(31, 191, 174, 0.1));
+    border: 1px solid rgba(34, 211, 238, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.25);
+    flex-shrink: 0;
+  }
+  .brand-icon svg {
+    width: 24px;
+    height: 24px;
+    color: var(--brand);
+  }
+  .brand-text h2 {
+    font-size: 16.5px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+  .brand-text span {
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  /* Identidade logada */
+  .identity-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 11px 13px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    margin-bottom: 22px;
+    box-shadow: var(--shadow-subtle);
+  }
+  .avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+    color: #05161A;
+    font-weight: 800;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 10px rgba(31, 191, 174, 0.3);
+  }
+  .avatar.lg {
+    width: 50px;
+    height: 50px;
+    font-size: 18px;
+  }
+  .identity-meta {
+    min-width: 0;
+    flex: 1;
+  }
+  .identity-meta b {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .identity-meta span {
+    font-size: 12px;
+    color: var(--brand);
+    font-weight: 700;
+  }
+  .btn-switch-user {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 11px;
+    padding: 4px 6px;
+    border-radius: 6px;
+  }
+  .btn-switch-user:hover {
+    color: #fff;
+    background: var(--bg-subtle);
+  }
+
+  /* Navegação */
+  nav.nav-tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: auto;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    background: transparent;
+    border: 1px solid transparent;
+    font-size: 13.5px;
+    font-weight: 600;
+    text-align: left;
+    transition: all 0.15s ease;
+  }
+  .nav-item svg {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+  }
+  .nav-item:hover {
+    color: #fff;
+    background: var(--bg-subtle);
+  }
+  .nav-item.active {
+    color: #fff;
+    background: rgba(34, 211, 238, 0.09);
+    border-color: rgba(34, 211, 238, 0.25);
+    box-shadow: inset 0 0 16px rgba(34, 211, 238, 0.08);
+  }
+  .nav-item.active svg {
+    color: var(--brand);
+  }
+  .nav-badge-count {
+    margin-left: auto;
+    background: var(--brand);
+    color: #07151F;
+    font-size: 10.5px;
+    font-weight: 800;
+    padding: 1px 7px;
+    border-radius: var(--radius-full);
+  }
+
+  /* CTA Acionar Reunião */
+  .btn-cta-acionar {
+    margin-top: 18px;
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+    color: #041E1C;
+    border: none;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 8px 24px rgba(31, 191, 174, 0.28);
+  }
+  .btn-cta-acionar:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 10px 30px rgba(31, 191, 174, 0.4);
+  }
+  .btn-cta-acionar svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* ================== Main Container ================== */
+  .main-viewport {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* Faixa de Sessão Ativa */
+  .ribbon-live {
+    background: linear-gradient(90deg, rgba(76, 111, 255, 0.18), rgba(34, 211, 238, 0.15));
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+    padding: 11px 32px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 13.5px;
+    color: #fff;
+    animation: fadeIn 0.4s ease;
+  }
+  .pulse-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--brand);
+    box-shadow: 0 0 10px var(--brand);
+    animation: pulse 1.6s infinite ease-in-out;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.35; transform: scale(0.85); }
+  }
+  .btn-ribbon-enter {
+    margin-left: auto;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 1px solid var(--border-strong);
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 12.5px;
+    font-weight: 700;
+  }
+  .btn-ribbon-enter:hover {
+    background: rgba(255, 255, 255, 0.18);
+  }
+
+  /* Área de Conteúdo */
+  .content-container {
+    max-width: 820px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 42px 30px 90px;
+  }
+  .page-header {
+    margin-bottom: 28px;
+  }
+  .page-header h1 {
+    font-size: 30px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+  .page-header p {
+    color: var(--text-muted);
+    font-size: 14.5px;
+    line-height: 1.55;
+    max-width: 580px;
+  }
+
+  /* Placar / Ranking */
+  .leaderboard {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    backdrop-filter: blur(18px);
+    overflow: hidden;
+  }
+  .leader-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.12s ease;
+  }
+  .leader-row:last-child {
+    border-bottom: none;
+  }
+  .leader-row:hover {
+    background: var(--bg-card-hover);
+  }
+  .leader-rank {
+    width: 32px;
+    text-align: center;
+    font-weight: 800;
+    font-size: 15px;
+    color: var(--text-faint);
+    flex-shrink: 0;
+  }
+  .leader-rank.top-1 {
+    color: var(--gold);
+    text-shadow: 0 0 12px var(--gold-glow);
+  }
+  .leader-rank.top-2 {
+    color: #E2E8F0;
+  }
+  .leader-rank.top-3 {
+    color: #CD7F32;
+  }
+  .leader-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .leader-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .you-badge {
+    background: rgba(31, 191, 174, 0.15);
+    color: var(--teal);
+    border: 1px solid rgba(31, 191, 174, 0.3);
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: var(--radius-full);
+    letter-spacing: 0.05em;
+  }
+  .leader-points {
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    min-width: 80px;
+    text-align: right;
+  }
+  .leader-points.neg {
+    color: var(--red);
+  }
+
+  /* Cards de Reuniões */
+  .meeting-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    margin-bottom: 14px;
+    cursor: pointer;
+    box-shadow: var(--shadow-subtle);
+    backdrop-filter: blur(14px);
+    transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+  }
+  .meeting-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-glow);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(34, 211, 238, 0.12);
+  }
+  .card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .card-ata-no {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text-faint);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .badge-status {
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    letter-spacing: 0.02em;
+  }
+  .badge-status.votacao {
+    background: rgba(34, 211, 238, 0.15);
+    color: var(--brand);
+    border: 1px solid rgba(34, 211, 238, 0.35);
+  }
+  .badge-status.culpado {
+    background: var(--red-soft);
+    color: var(--red);
+    border: 1px solid rgba(248, 113, 113, 0.3);
+  }
+  .badge-status.inocente {
+    background: var(--green-soft);
+    color: var(--green);
+    border: 1px solid rgba(52, 211, 153, 0.3);
+  }
+  .card-reason {
+    font-size: 14.5px;
+    color: var(--text);
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+  .card-meta {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .card-meta b {
+    color: #fff;
+  }
+
+  /* Detalhe da Ata / Sala de Sessão */
+  .ata-room {
+    background: var(--bg-card-solid);
+    border: 1px solid rgba(34, 211, 238, 0.3);
+    border-radius: var(--radius-lg);
+    padding: 34px 38px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 30px rgba(34, 211, 238, 0.12);
+  }
+  .btn-back-link {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 13.5px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 22px;
+  }
+  .btn-back-link:hover {
+    color: #fff;
+  }
+  .ata-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 22px;
+  }
+  .ata-header h2 {
+    font-size: 24px;
+    font-weight: 800;
+    color: #fff;
+  }
+  .ata-header .ata-date {
+    font-size: 12.5px;
+    color: var(--text-faint);
+    margin-top: 4px;
+  }
+  .accused-banner {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .accused-info label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-faint);
+  }
+  .accused-info h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .reason-callout {
+    border-left: 3px solid var(--brand);
+    padding: 12px 18px;
+    background: rgba(34, 211, 238, 0.04);
+    border-radius: 0 8px 8px 0;
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: #F1F5F9;
+    margin-bottom: 28px;
+  }
+
+  /* Chat Bilateral */
+  .chat-box {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 0;
+    margin-bottom: 26px;
+  }
+  .chat-box-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+  .chat-box-desc {
+    font-size: 12.5px;
+    color: var(--text-faint);
+    margin-bottom: 16px;
+  }
+  .chat-stream {
+    max-height: 280px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-right: 6px;
+    margin-bottom: 16px;
+  }
+  .chat-bubble {
+    max-width: 82%;
+    padding: 11px 15px;
+    border-radius: 14px;
+    font-size: 13.5px;
+    line-height: 1.45;
+  }
+  .chat-bubble.from-req {
+    align-self: flex-start;
+    background: rgba(76, 111, 255, 0.14);
+    border: 1px solid rgba(76, 111, 255, 0.35);
+    border-top-left-radius: 4px;
+  }
+  .chat-bubble.from-acc {
+    align-self: flex-end;
+    background: rgba(31, 191, 174, 0.14);
+    border: 1px solid rgba(31, 191, 174, 0.35);
+    border-top-right-radius: 4px;
+    text-align: right;
+  }
+  .chat-author {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+  .chat-author span {
+    font-size: 10px;
+    opacity: 0.7;
+  }
+  .chat-input-bar {
+    display: flex;
+    gap: 10px;
+  }
+  .chat-input-bar input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    color: #fff;
+    font-size: 13.5px;
+  }
+  .chat-input-bar input:focus {
+    border-color: var(--brand);
+    box-shadow: 0 0 0 2px var(--brand-glow);
+  }
+  .btn-send-chat {
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    font-weight: 700;
+    padding: 0 20px;
+    border-radius: var(--radius-sm);
+  }
+  .btn-send-chat:hover {
+    background: var(--blue-dark);
+  }
+
+  /* Área de Votos */
+  .voting-zone {
+    padding-top: 10px;
+  }
+  .voting-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .btn-vote-option {
+    padding: 16px;
+    border-radius: var(--radius);
+    border: 1.5px solid transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+  .btn-vote-option b {
+    font-size: 15px;
+  }
+  .btn-vote-option span {
+    font-size: 12px;
+    opacity: 0.8;
+  }
+  .btn-vote-option.vote-culpado {
+    background: var(--red-soft);
+    color: var(--red);
+  }
+  .btn-vote-option.vote-culpado:hover {
+    border-color: var(--red);
+  }
+  .btn-vote-option.vote-inocente {
+    background: var(--green-soft);
+    color: var(--green);
+  }
+  .btn-vote-option.vote-inocente:hover {
+    border-color: var(--green);
+  }
+  .vote-progress-bar {
+    height: 7px;
+    background: var(--border);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin: 10px 0 20px;
+  }
+  .vote-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--teal), var(--brand));
+    border-radius: var(--radius-full);
+    transition: width 0.3s ease;
+  }
+  .verdict-banner {
+    padding: 20px 24px;
+    border-radius: var(--radius);
+    margin-bottom: 24px;
+  }
+  .verdict-banner.culpado {
+    background: var(--red-soft);
+    border: 1px solid rgba(248, 113, 113, 0.4);
+    color: var(--red);
+  }
+  .verdict-banner.inocente {
+    background: var(--green-soft);
+    border: 1px solid rgba(52, 211, 153, 0.4);
+    color: var(--green);
+  }
+  .verdict-banner h3 {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  /* ================== Livro de Regras (3D + Leitor) ================== */
+  .book-module {
+    position: relative;
+    width: 100%;
+    min-height: 600px;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: #060913;
+    box-shadow: var(--shadow-card);
+  }
+  .book-3d-stage {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+  }
+  .book-3d-stage:active {
+    cursor: grabbing;
+  }
+  .book-3d-overlay-hint {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(7, 11, 20, 0.82);
+    border: 1px solid var(--border-strong);
+    padding: 10px 22px;
+    border-radius: var(--radius-full);
+    color: #fff;
+    font-size: 13.5px;
+    font-weight: 600;
+    backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  /* Leitor de Páginas Pautadas (Apple Level) */
+  .reader-container {
+    position: relative;
+    padding: 40px 26px;
+    min-height: 620px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: radial-gradient(circle at 50% 30%, rgba(26, 38, 66, 0.85) 0%, rgba(7, 11, 20, 0.95) 100%);
+    backdrop-filter: blur(20px);
+  }
+  .reader-paper-card {
+    max-width: 580px;
+    width: 100%;
+    min-height: 480px;
+    background: #FAF6ED;
+    background-image:
+      linear-gradient(#FAF6ED 1.5rem, transparent 1.5rem),
+      linear-gradient(90deg, transparent 48px, #F29E9E 48px, #F29E9E 49px, transparent 49px),
+      repeating-linear-gradient(transparent, transparent 27px, #E5DCBA 27px, #E5DCBA 28px);
+    background-size: 100% 28px;
+    color: #241D15;
+    border-radius: 12px;
+    padding: 38px 42px 42px 64px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), inset 0 0 30px rgba(184, 151, 98, 0.15);
+    position: relative;
+    margin-bottom: 24px;
+    transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.3s;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .paper-page-content h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: #1A150E;
+    margin-bottom: 16px;
+  }
+  .paper-page-content h3 {
+    font-size: 16px;
+    font-weight: 800;
+    color: #2E2519;
+    margin: 18px 0 8px;
+    border-bottom: 1.5px solid #D6C5A2;
+    padding-bottom: 4px;
+  }
+  .paper-page-content p {
+    font-size: 14px;
+    line-height: 28px;
+    color: #362C1E;
+    margin-bottom: 14px;
+  }
+  .rule-block {
+    background: rgba(184, 151, 98, 0.1);
+    border-left: 3px solid #9C7A44;
+    padding: 10px 14px;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 14px;
+  }
+  .rule-block b {
+    display: block;
+    color: #1E170F;
+    font-size: 13.5px;
+    margin-bottom: 2px;
+  }
+  .reader-progress-track {
+    width: 100%;
+    max-width: 580px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .reader-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--brand));
+    border-radius: var(--radius-full);
+    transition: width 0.35s ease;
+  }
+  .reader-nav-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .btn-reader-nav {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    border: 1px solid var(--border-strong);
+    padding: 10px 22px;
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    font-size: 13.5px;
+  }
+  .btn-reader-nav:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.18);
+  }
+  .btn-reader-nav:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  .btn-reader-nav.primary {
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    color: #161C28;
+    border: none;
+    box-shadow: 0 4px 16px var(--gold-glow);
+  }
+
+  /* ================== Configurações ================== */
+  .config-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 26px 30px;
+    margin-bottom: 24px;
+    backdrop-filter: blur(14px);
+  }
+  .config-card h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+  .config-card p.desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .input-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .input-field label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+  .input-field input, .input-field select, .input-field textarea {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    color: #fff;
+    font-size: 14px;
+  }
+  .input-field input:focus, .input-field select:focus, .input-field textarea:focus {
+    border-color: var(--brand);
+    box-shadow: 0 0 0 2px var(--brand-glow);
+  }
+  .btn-action-primary {
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+    color: #041E1C;
+    border: none;
+    font-weight: 700;
+    font-size: 13.5px;
+    padding: 11px 22px;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 6px 18px rgba(31, 191, 174, 0.25);
+  }
+
+  /* ================== Modais ================== */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: rgba(4, 7, 14, 0.78);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.2s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; } to { opacity: 1; }
+  }
+  .modal-panel {
+    background: var(--bg-card-solid);
+    border: 1px solid rgba(34, 211, 238, 0.35);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 480px;
+    padding: 34px 34px 28px;
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.8), 0 0 30px rgba(34, 211, 238, 0.12);
+  }
+  .modal-panel h2 {
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+  .modal-panel p.sub {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin-bottom: 22px;
+    line-height: 1.5;
+  }
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  .btn-modal-cancel {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 14px;
+    padding: 10px 16px;
+  }
+  .btn-modal-cancel:hover {
+    color: #fff;
+  }
+
+  /* Boas-vindas personalizadas */
+  .welcome-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 600;
+    background: radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.12), rgba(4, 7, 14, 0.88) 70%);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    animation: fadeIn 0.3s ease;
+  }
+  .welcome-card-content {
+    text-align: center;
+    color: #fff;
+  }
+  .welcome-avatar-pulse {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+    color: #05161A;
+    font-size: 32px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    box-shadow: 0 0 0 8px rgba(34, 211, 238, 0.2), 0 0 50px rgba(31, 191, 174, 0.6);
+  }
+  .welcome-points-val {
+    font-size: 48px;
+    font-weight: 800;
+    color: var(--brand);
+    text-shadow: 0 0 30px var(--brand-glow);
+    margin: 6px 0;
+  }
+
+  /* Toast Notification */
+  .toast-alert {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--bg-card-solid);
+    border: 1px solid var(--border-strong);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: var(--radius-full);
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    z-index: 2000;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .toast-alert.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Responsividade */
+  @media (max-width: 820px) {
+    #app { flex-direction: column; }
+    .sidebar {
+      width: 100%;
+      height: auto;
+      position: relative;
+      flex-direction: row;
+      flex-wrap: wrap;
+      padding: 16px 20px;
+      align-items: center;
+    }
+    .brand { margin-bottom: 0; margin-right: auto; }
+    .identity-card { order: 3; width: 100%; margin-top: 14px; margin-bottom: 0; }
+    nav.nav-tabs { order: 4; flex-direction: row; width: 100%; overflow-x: auto; margin-top: 10px; }
+    .btn-cta-acionar { order: 2; margin-top: 0; padding: 9px 14px; }
+    .content-container { padding: 24px 18px 60px; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .reader-paper-card { padding: 30px 24px 34px 40px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Tela de Abertura Cinematográfica 3D (Splash Screen) -->
+<div class="splash-screen" id="splash-screen">
+  <div class="splash-canvas-container" id="splash-canvas-mount"></div>
+  <div class="splash-ui">
+    <div class="splash-badge">Código de Conduta &middot; Octafin</div>
+    <h1 class="splash-title">Comitê de Acionamento</h1>
+    <p class="splash-sub">Acesse a sala de governança, registre votos de responsabilidade e consulte o livro das regras corporativas.</p>
+    <div class="splash-actions">
+      <button class="btn-unlock-splash" id="btn-unlock-splash">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        Destrancar Livro 3D
+      </button>
+      <button class="btn-skip-splash" id="btn-skip-splash">Entrar no Sistema &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<!-- Layout Principal do Sistema -->
+<div id="app">
+  <div class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M12 3v18"/>
+          <path d="M3 12h18"/>
+          <circle cx="12" cy="12" r="4"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h2>Octafin</h2>
+        <span>Comitê de Votos</span>
+      </div>
+    </div>
+
+    <!-- Identidade do Colaborador Logado -->
+    <div id="identity-slot"></div>
+
+    <nav class="nav-tabs" id="nav-tabs-slot"></nav>
+
+    <button class="btn-cta-acionar" id="btn-acionar-slot">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      Acionar Reunião
+    </button>
+  </div>
+
+  <div class="main-viewport">
+    <div id="ribbon-slot"></div>
+    <div class="content-container" id="content-slot"></div>
+  </div>
+</div>
+
+<!-- Modal Container & Toasts -->
+<div id="modal-slot"></div>
+<div id="welcome-slot"></div>
+<div class="toast-alert" id="toast-el"></div>
+
+<script>
+/* =========================================================================
+   1. ESTADO GLOBAL, PERSISTÊNCIA E USUÁRIOS AUTORIZADOS
+   ========================================================================= */
+
+const USERS = [
+  { name: 'Ana Borges',        email: 'anacaoliborges@gmail.com',      password: '12345' },
+  { name: 'Arthur Rocha',      email: 'arthur@octafin.com.br',         password: '12345' },
+  { name: 'Arthur Silva',      email: 'arthursilva@octafin.com.br',    password: '12345' },
+  { name: 'Bianca Galindo',    email: 'bianca@octafin.com',            password: '12345' },
+  { name: 'Caio Roberto',      email: 'caioocta1@gmail.com',           password: '12345' },
+  { name: 'Carlos Eduardo',    email: 'duduocta4@gmail.com',           password: '12345' },
+  { name: 'Gabriel Sousa',     email: 'gabrielsousa@gmail.com',        password: '12345' },
+  { name: 'Guilherme Galindo', email: 'guilhermerigopoulos@gmail.com', password: '12345' },
+  { name: 'Gunther Rios',      email: 'guntherocta@gmail.com',         password: '12345' },
+  { name: 'Kaique Rodrigo',    email: 'kaiquerodrigo152@gmail.com',    password: '12345' },
+  { name: 'Rodrigo Dantas',    email: 'rodrigo@octafin.com.br',        password: '12345' }
+];
+
+let state = {
+  me: null,
+  employees: [],
+  records: [],
+  settings: {
+    pontosPorInfracao: 10,
+    quorumMinimo: 3,
+    percentualMaioria: 50
+  },
+  activeTab: 'placar',
+  openMeetingId: null,
+  currentModal: null,
+  welcomeOverlay: null,
+  readerMode: false,
+  readerPageIndex: 0
+};
+
+async function storageGet(key, isShared) {
+  try {
+    if (window.storage && typeof window.storage.get === 'function') {
+      const res = await window.storage.get(key, isShared);
+      return res ? JSON.parse(res.value) : null;
+    }
+  } catch (e) {
+    console.warn('Storage fallback:', e);
+  }
+  const raw = localStorage.getItem(`octa_${key}`);
+  return raw ? JSON.parse(raw) : null;
+}
+
+async function storageSet(key, value, isShared) {
+  try {
+    if (window.storage && typeof window.storage.set === 'function') {
+      await window.storage.set(key, JSON.stringify(value), isShared);
+    }
+  } catch (e) {
+    console.warn('Storage fallback:', e);
+  }
+  try {
+    localStorage.setItem(`octa_${key}`, JSON.stringify(value));
+    return true;
+  } catch(e) {
+    console.error('Falha localStorage', e);
+    return false;
+  }
+}
+
+async function loadData() {
+  const [emp, rec, cfg, me] = await Promise.all([
+    storageGet('employees', true),
+    storageGet('records', true),
+    storageGet('settings', true),
+    storageGet('my_name', false)
+  ]);
+
+  if (emp && Array.isArray(emp) && emp.length > 0) {
+    state.employees = emp;
+  } else if (state.employees.length === 0) {
+    state.employees = USERS.map(u => ({ id: uid(), name: u.name, points: 0 }));
+    storageSet('employees', state.employees, true);
+  }
+
+  if (rec && Array.isArray(rec)) state.records = rec;
+  if (cfg && cfg.pontosPorInfracao !== undefined) state.settings = cfg;
+  if (me) state.me = me;
+}
+
+function uid() {
+  return Math.random().toString(36).slice(2, 10);
+}
+
+function getInitials(name) {
+  return (name || '?').trim().split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+}
+
+function showToast(msg) {
+  const el = document.getElementById('toast-el');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str ?? '';
+  return div.innerHTML;
+}
+
+/* =========================================================================
+   2. PÁGINAS DO CÓDIGO DE CONDUTA (10 Páginas)
+   ========================================================================= */
+
+const CODE_PAGES = [
+  {
+    title: "Código de Conduta e Convivência",
+    subtitle: "Octafin &middot; Princípios Fundamentais",
+    content: `
+      <h2>Código de Conduta</h2>
+      <p style="font-size:16px;font-style:italic;color:#5c4728;margin-bottom:20px;">"Na Octafin, a confiança que construímos com o cliente começa no respeito que praticamos dentro da equipe."</p>
+      <div class="rule-block">
+        <b>Valores Essenciais</b>
+        Respeito mútuo, transparência ativa, pontualidade rigorosa e responsabilidade coletiva nos resultados.
+      </div>
+      <p>Este livro reúne as diretrizes que protegem nossa cultura e determinam as deliberações do Comitê de Acionamento.</p>
+    `
+  },
+  {
+    title: "Preâmbulo & Diretrizes Gerais",
+    subtitle: "Abertura Oficial",
+    content: `
+      <h3>Preâmbulo Institucional</h3>
+      <p>Este Código orienta a conduta diária de todos os colaboradores, sócios e prestadores na Octafin. Respeito, clareza e atendimento humanizado valem com clientes e principalmente entre colegas.</p>
+      <div class="rule-block">
+        <b>Alcance Irrestrito</b>
+        Nenhum cargo, tempo de casa ou meta comercial isenta qualquer profissional do cumprimento integral deste código.
+      </div>
+    `
+  },
+  {
+    title: "Capítulo I — Respeito e Convivência",
+    subtitle: "Artigos 1º ao 4º",
+    content: `
+      <h3>Capítulo I — Do Respeito</h3>
+      <div class="rule-block">
+        <b>Art. 1º &middot; Respeito à Dignidade</b>
+        Trate todos com cortesia e consideração. Humilhar, intimidar ou diminuir um colega é infração grave.
+      </div>
+      <div class="rule-block">
+        <b>Art. 2º &middot; Limites das Brincadeiras</b>
+        Brincadeiras não podem atingir aparência, família ou religião. "Só brincadeira" jamais justifica desrespeito.
+      </div>
+      <div class="rule-block">
+        <b>Art. 3º &middot; Comunicação Respeitosa</b>
+        Mantenha a calma sob pressão. Gritos, ironias ou deboches não são tolerados em nenhum canal da empresa.
+      </div>
+    `
+  },
+  {
+    title: "Capítulo I — Convivência (Cont.)",
+    subtitle: "Artigo 4º",
+    content: `
+      <h3>Preservação da Imagem</h3>
+      <div class="rule-block">
+        <b>Art. 4º &middot; Proteção à Imagem</b>
+        É expressamente proibido expor colegas, compartilhar prints de conversas internas ou ridicularizar membros da equipe em redes sociais ou grupos externos.
+      </div>
+      <p>O ambiente de trabalho seguro depende da confiança mútua e da discrição sobre as rotinas da equipe.</p>
+    `
+  },
+  {
+    title: "Capítulo II — Pontualidade & Compromisso",
+    subtitle: "Artigos 5º ao 7º",
+    content: `
+      <h3>Capítulo II — Da Pontualidade</h3>
+      <div class="rule-block">
+        <b>Art. 5º &middot; Cumprimento de Horários</b>
+        Pontualidade em entradas, reuniões e alinhamentos é respeito ao tempo dos seus parceiros de equipe.
+      </div>
+      <div class="rule-block">
+        <b>Art. 6º &middot; Comunicação de Imprevistos</b>
+        Comunique atrasos e ausências à liderança com a máxima antecedência possível, informando o motivo real.
+      </div>
+      <div class="rule-block">
+        <b>Art. 7º &middot; Responsabilidade por Atividades</b>
+        Acompanhe seus prazos. Assuma erros com transparência imediata; não esconda problemas nem culpe terceiros.
+      </div>
+    `
+  },
+  {
+    title: "Capítulo III — Hierarquia e Liderança",
+    subtitle: "Artigos 8º ao 10º",
+    content: `
+      <h3>Capítulo III — Da Liderança</h3>
+      <div class="rule-block">
+        <b>Art. 8º &middot; Estrutura de Liderança</b>
+        Respeite as diretrizes e orientações operacionais estabelecidas pelos líderes de cada área.
+      </div>
+      <div class="rule-block">
+        <b>Art. 9º &middot; Direito à Manifestação</b>
+        Opiniões divergentes e sugestões são bem-vindas, desde que apresentadas com educação nos canais adequados.
+      </div>
+      <div class="rule-block">
+        <b>Art. 10 &middot; Exemplo da Liderança</b>
+        Líderes devem orientar e corrigir com discrição. Cargo superior não autoriza grosserias ou retaliações.
+      </div>
+    `
+  },
+  {
+    title: "Capítulo IV — Colaboração e Resultados",
+    subtitle: "Artigos 11 e 12",
+    content: `
+      <h3>Capítulo IV — Do Time</h3>
+      <div class="rule-block">
+        <b>Art. 11 &middot; Competição Saudável</b>
+        A busca por metas individuais jamais deve sabotar o trabalho alheio ou apropriar-se indevidamente de clientes de colegas.
+      </div>
+      <div class="rule-block">
+        <b>Art. 12 &middot; Espírito de Cooperação</b>
+        Compartilhe boas práticas e ajude quem necessita de suporte técnico. A fofoca destrói a produtividade do time.
+      </div>
+    `
+  },
+  {
+    title: "Capítulo V — Atendimento e Sigilo",
+    subtitle: "Artigos 13 ao 15",
+    content: `
+      <h3>Capítulo V — Confiança do Cliente</h3>
+      <div class="rule-block">
+        <b>Art. 13 &middot; Atendimento Humanizado</b>
+        Trate o cliente com clareza absoluta, sem omissões de tarifas ou promessas irreais de crédito.
+      </div>
+      <div class="rule-block">
+        <b>Art. 14 &middot; Transparência nas Operações</b>
+        Nunca forneça informações falsas sobre taxas ou prazos para forçar o fechamento de contratos.
+      </div>
+      <div class="rule-block">
+        <b>Art. 15 &middot; Sigilo e Proteção de Dados (LGPD)</b>
+        Dados bancários e pessoais dos clientes só devem trafegar pelos canais oficiais e seguros da Octafin.
+      </div>
+    `
+  },
+  {
+    title: "Capítulo VI — O Comitê de Votação",
+    subtitle: "Artigos 16 ao 18",
+    content: `
+      <h3>Capítulo VI — Das Sanções</h3>
+      <div class="rule-block">
+        <b>Art. 16 &middot; Acionamento Justo</b>
+        Qualquer colaborador pode acionar o comitê quando houver prejuízo operacional, ético ou quebra de conduta comprovada.
+      </div>
+      <div class="rule-block">
+        <b>Art. 17 &middot; Ampla Defesa no Debate</b>
+        O acusado tem direito a explicar os fatos no chat oficial antes do encerramento da votação soberana.
+      </div>
+      <div class="rule-block">
+        <b>Art. 18 &middot; Desconto de Pontos</b>
+        A condenação com quórum mínimo resulta na perda automática de pontos no Placar Geral da empresa.
+      </div>
+    `
+  },
+  {
+    title: "Compromisso de Honra",
+    subtitle: "Artigos 19 e 20",
+    content: `
+      <h3>Encerramento das Normas</h3>
+      <div class="rule-block">
+        <b>Art. 19 &middot; Soberania do Comitê</b>
+        As deliberações sacramentadas pelo quórum são definitivas e registradas em Ata permanente.
+      </div>
+      <div class="rule-block">
+        <b>Art. 20 &middot; Compromisso com a Cultura</b>
+        Ao entrar na Octafin, assumimos o pacto de manter um ambiente ético, vitorioso e de respeito mútuo.
+      </div>
+      <p style="text-align:center;margin-top:28px;font-weight:700;color:#5c4728;">— DIRETORIA OCTAFIN —</p>
+    `
+  }
+];
+
+/* =========================================================================
+   3. CENA 3D CINEMATOGRÁFICA COM THREE.JS
+   ========================================================================= */
+
+class Book3DScene {
+  constructor(containerEl, onUnlockedCallback) {
+    this.container = containerEl;
+    this.onUnlocked = onUnlockedCallback;
+    this.width = containerEl.clientWidth;
+    this.height = containerEl.clientHeight;
+    this.isUnlocking = false;
+    this.unlocked = false;
+
+    this.mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
+    this.clock = new THREE.Clock();
+
+    this.initScene();
+    this.createUniverse();
+    this.createBook();
+    this.createDustSystem();
+    this.bindEvents();
+    this.animate();
+  }
+
+  initScene() {
+    this.scene = new THREE.Scene();
+    this.camera = new THREE.PerspectiveCamera(45, this.width / this.height, 0.1, 1000);
+    this.camera.position.set(0, 0, 9.2);
+
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+    this.renderer.setSize(this.width, this.height);
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.container.appendChild(this.renderer.domElement);
+
+    const ambientLight = new THREE.AmbientLight(0x1B243B, 1.4);
+    this.scene.add(ambientLight);
+
+    const goldKeyLight = new THREE.DirectionalLight(0xFFE5A3, 2.2);
+    goldKeyLight.position.set(5, 7, 8);
+    this.scene.add(goldKeyLight);
+
+    const cyanRimLight = new THREE.DirectionalLight(0x22D3EE, 1.8);
+    cyanRimLight.position.set(-8, -4, -4);
+    this.scene.add(cyanRimLight);
+
+    const purpleBackLight = new THREE.PointLight(0x8B5CF6, 2.5, 30);
+    purpleBackLight.position.set(0, 4, -8);
+    this.scene.add(purpleBackLight);
+  }
+
+  createCanvasTexture(drawerFn, width = 512, height = 512) {
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    drawerFn(ctx, width, height);
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.ClampToEdgeWrapping;
+    texture.wrapT = THREE.ClampToEdgeWrapping;
+    return texture;
+  }
+
+  createUniverse() {
+    this.universeGroup = new THREE.Group();
+
+    const starCounts = [700, 400, 200];
+    const starColors = [0xFFFFFF, 0xA5F3FC, 0xFDE68A];
+    const starSizes = [0.06, 0.09, 0.13];
+
+    starCounts.forEach((count, layer) => {
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(count * 3);
+      for (let i = 0; i < count * 3; i += 3) {
+        pos[i] = (Math.random() - 0.5) * 60;
+        pos[i + 1] = (Math.random() - 0.5) * 45;
+        pos[i + 2] = -15 - Math.random() * 30 - layer * 15;
+      }
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      const mat = new THREE.PointsMaterial({
+        color: starColors[layer],
+        size: starSizes[layer],
+        transparent: true,
+        opacity: 0.85
+      });
+      const points = new THREE.Points(geo, mat);
+      this.universeGroup.add(points);
+    });
+
+    const planetTex = this.createCanvasTexture((ctx, w, h) => {
+      const grad = ctx.createLinearGradient(0, 0, w, h);
+      grad.addColorStop(0, '#0F172A');
+      grad.addColorStop(0.4, '#1E293B');
+      grad.addColorStop(0.7, '#0284C7');
+      grad.addColorStop(1, '#0C4A6E');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.18)';
+      ctx.fillRect(0, h * 0.35, w, h * 0.12);
+      ctx.fillRect(0, h * 0.6, w, h * 0.08);
+    }, 256, 256);
+
+    const planetGeo = new THREE.SphereGeometry(3.8, 32, 32);
+    const planetMat = new THREE.MeshStandardMaterial({
+      map: planetTex,
+      roughness: 0.7,
+      metalness: 0.1
+    });
+    this.distantPlanet = new THREE.Mesh(planetGeo, planetMat);
+    this.distantPlanet.position.set(14, 6, -22);
+    this.universeGroup.add(this.distantPlanet);
+
+    this.scene.add(this.universeGroup);
+  }
+
+  createBook() {
+    this.bookGroup = new THREE.Group();
+
+    const bookWidth = 3.6;
+    const bookHeight = 4.8;
+    const bookDepth = 0.65;
+
+    const coverTex = this.createCanvasTexture((ctx, w, h) => {
+      ctx.fillStyle = '#0E1726';
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.strokeStyle = '#D4AF37';
+      ctx.lineWidth = 10;
+      ctx.strokeRect(26, 26, w - 52, h - 52);
+
+      ctx.strokeStyle = 'rgba(212, 175, 55, 0.4)';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(38, 38, w - 76, h - 76);
+
+      const cSize = 30;
+      ctx.fillStyle = '#E6CA65';
+      ctx.fillRect(26, 26, cSize, 6);
+      ctx.fillRect(26, 26, 6, cSize);
+      ctx.fillRect(w - 26 - cSize, 26, cSize, 6);
+      ctx.fillRect(w - 32, 26, 6, cSize);
+
+      ctx.save();
+      ctx.translate(w / 2, h / 2 - 40);
+      ctx.fillStyle = '#D4AF37';
+      ctx.beginPath();
+      ctx.arc(0, 0, 48, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#0E1726';
+      ctx.beginPath();
+      ctx.arc(-15, -6, 7, 0, Math.PI * 2);
+      ctx.arc(15, -6, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#F8FAFC';
+      ctx.font = 'bold 26px sans-serif';
+      ctx.fillText('CÓDIGO DE CONDUTA', w / 2, h / 2 + 54);
+
+      ctx.fillStyle = '#D4AF37';
+      ctx.font = 'bold 15px sans-serif';
+      ctx.fillText('OCTAFIN', w / 2, h / 2 + 86);
+    });
+
+    const pageEdgeTex = this.createCanvasTexture((ctx, w, h) => {
+      ctx.fillStyle = '#E8DEC4';
+      ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = 'rgba(120, 95, 55, 0.35)';
+      ctx.lineWidth = 2;
+      for (let y = 0; y < h; y += 4) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+    }, 128, 512);
+
+    const pagesGeo = new THREE.BoxGeometry(bookWidth * 0.94, bookHeight * 0.96, bookDepth * 0.82);
+    const pagesMat = new THREE.MeshStandardMaterial({
+      map: pageEdgeTex,
+      roughness: 0.9
+    });
+    this.pagesBlock = new THREE.Mesh(pagesGeo, pagesMat);
+    this.pagesBlock.position.set(0.08, 0, 0);
+    this.bookGroup.add(this.pagesBlock);
+
+    const backCoverGeo = new THREE.BoxGeometry(bookWidth, bookHeight, 0.07);
+    const coverMat = new THREE.MeshStandardMaterial({
+      color: 0x121A2B,
+      roughness: 0.45,
+      metalness: 0.25
+    });
+    const backCover = new THREE.Mesh(backCoverGeo, coverMat);
+    backCover.position.set(0, 0, -bookDepth * 0.45);
+    this.bookGroup.add(backCover);
+
+    const spineGeo = new THREE.BoxGeometry(0.12, bookHeight, bookDepth);
+    const spineMat = new THREE.MeshStandardMaterial({ color: 0x0D1424, roughness: 0.5 });
+    const spine = new THREE.Mesh(spineGeo, spineMat);
+    spine.position.set(-bookWidth * 0.5, 0, 0);
+    this.bookGroup.add(spine);
+
+    this.coverPivot = new THREE.Group();
+    this.coverPivot.position.set(-bookWidth * 0.5, 0, bookDepth * 0.45);
+
+    const frontCoverGeo = new THREE.BoxGeometry(bookWidth, bookHeight, 0.08);
+    const frontCoverMat = new THREE.MeshStandardMaterial({
+      map: coverTex,
+      roughness: 0.4,
+      metalness: 0.3
+    });
+    const frontCover = new THREE.Mesh(frontCoverGeo, frontCoverMat);
+    frontCover.position.set(bookWidth * 0.5, 0, 0);
+    this.coverPivot.add(frontCover);
+
+    const insideSheetGeo = new THREE.PlaneGeometry(bookWidth * 0.96, bookHeight * 0.96);
+    const sheetTex = this.createCanvasTexture((ctx, w, h) => {
+      ctx.fillStyle = '#FBF7EE';
+      ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.25)';
+      ctx.lineWidth = 1.5;
+      for (let y = 30; y < h; y += 22) {
+        ctx.beginPath();
+        ctx.moveTo(30, y);
+        ctx.lineTo(w - 30, y);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = 'rgba(239, 68, 68, 0.4)';
+      ctx.beginPath();
+      ctx.moveTo(50, 0);
+      ctx.lineTo(50, h);
+      ctx.stroke();
+    });
+    const insideSheetMat = new THREE.MeshBasicMaterial({ map: sheetTex, side: THREE.DoubleSide });
+    this.insideSheet = new THREE.Mesh(insideSheetGeo, insideSheetMat);
+    this.insideSheet.position.set(bookWidth * 0.48, 0, -0.04);
+    this.coverPivot.add(this.insideSheet);
+
+    this.bookGroup.add(this.coverPivot);
+
+    this.createOctoLock(bookWidth);
+
+    this.bookGroup.rotation.set(0.2, -0.28, 0.05);
+    this.scene.add(this.bookGroup);
+  }
+
+  createOctoLock(bookWidth) {
+    this.lockGroup = new THREE.Group();
+    this.lockGroup.position.set(bookWidth * 0.48, 0, 0.45);
+
+    const lockBodyGeo = new THREE.CylinderGeometry(0.55, 0.6, 0.25, 24);
+    const goldMat = new THREE.MeshStandardMaterial({
+      color: 0xD4AF37,
+      metalness: 0.85,
+      roughness: 0.25
+    });
+    const lockBody = new THREE.Mesh(lockBodyGeo, goldMat);
+    lockBody.rotation.x = Math.PI / 2;
+    this.lockGroup.add(lockBody);
+
+    const headGeo = new THREE.SphereGeometry(0.42, 24, 24);
+    const octoMat = new THREE.MeshStandardMaterial({
+      color: 0x1E293B,
+      metalness: 0.6,
+      roughness: 0.3
+    });
+    const head = new THREE.Mesh(headGeo, octoMat);
+    head.position.set(0, 0, 0.15);
+    this.lockGroup.add(head);
+
+    const eyeGeo = new THREE.SphereGeometry(0.08, 12, 12);
+    const eyeMat = new THREE.MeshBasicMaterial({ color: 0x22D3EE });
+    const eyeLeft = new THREE.Mesh(eyeGeo, eyeMat);
+    eyeLeft.position.set(-0.16, 0.1, 0.5);
+    const eyeRight = new THREE.Mesh(eyeGeo, eyeMat);
+    eyeRight.position.set(0.16, 0.1, 0.5);
+    this.lockGroup.add(eyeLeft);
+    this.lockGroup.add(eyeRight);
+
+    this.tentacles = [];
+    const tentacleAngles = [0.2, 1.1, 2.3, 3.4, 4.5, 5.5];
+
+    tentacleAngles.forEach((ang) => {
+      const curve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(Math.cos(ang) * 0.45, Math.sin(ang) * 0.45, 0.2),
+        new THREE.Vector3(Math.cos(ang) * 0.95, Math.sin(ang) * 0.95, 0.1),
+        new THREE.Vector3(Math.cos(ang) * 1.5, Math.sin(ang) * 1.4, -0.3)
+      ]);
+      const tubeGeo = new THREE.TubeGeometry(curve, 16, 0.08, 8, false);
+      const tentacleMesh = new THREE.Mesh(tubeGeo, goldMat);
+      this.lockGroup.add(tentacleMesh);
+      this.tentacles.push(tentacleMesh);
+    });
+
+    this.bookGroup.add(this.lockGroup);
+  }
+
+  createDustSystem() {
+    const count = 350;
+    this.dustGeo = new THREE.BufferGeometry();
+    this.dustPositions = new Float32Array(count * 3);
+    this.dustVelocities = [];
+
+    for (let i = 0; i < count; i++) {
+      this.dustPositions[i * 3] = (Math.random() - 0.5) * 1.5;
+      this.dustPositions[i * 3 + 1] = (Math.random() - 0.5) * 2;
+      this.dustPositions[i * 3 + 2] = 0.5;
+
+      this.dustVelocities.push(new THREE.Vector3(
+        (Math.random() - 0.5) * 0.04,
+        (Math.random() - 0.5) * 0.04 + 0.015,
+        Math.random() * 0.05 + 0.01
+      ));
+    }
+
+    this.dustGeo.setAttribute('position', new THREE.BufferAttribute(this.dustPositions, 3));
+
+    this.dustMat = new THREE.PointsMaterial({
+      color: 0xE4C37F,
+      size: 0.12,
+      transparent: true,
+      opacity: 0,
+      blending: THREE.AdditiveBlending
+    });
+
+    this.dustParticles = new THREE.Points(this.dustGeo, this.dustMat);
+    this.bookGroup.add(this.dustParticles);
+  }
+
+  bindEvents() {
+    window.addEventListener('resize', () => {
+      this.width = this.container.clientWidth;
+      this.height = this.container.clientHeight;
+      this.camera.aspect = this.width / this.height;
+      this.camera.updateProjectionMatrix();
+      this.renderer.setSize(this.width, this.height);
+    });
+
+    const onMove = (clientX, clientY) => {
+      this.mouse.targetX = (clientX / window.innerWidth - 0.5) * 1.5;
+      this.mouse.targetY = (clientY / window.innerHeight - 0.5) * 1.5;
+    };
+
+    window.addEventListener('mousemove', (e) => onMove(e.clientX, e.clientY));
+    window.addEventListener('touchmove', (e) => {
+      if (e.touches.length > 0) onMove(e.touches[0].clientX, e.touches[0].clientY);
+    });
+
+    this.container.addEventListener('click', () => {
+      if (!this.isUnlocking && !this.unlocked) {
+        this.unlockCinematicSequence();
+      }
+    });
+  }
+
+  unlockCinematicSequence() {
+    if (this.isUnlocking || this.unlocked) return;
+    this.isUnlocking = true;
+    showToast('✨ Destrancando o Livro de Regras...');
+
+    const startTime = performance.now();
+    const duration = 2800;
+
+    const animateUnlock = (now) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(1, elapsed / duration);
+
+      this.camera.position.z = 9.2 - Math.sin(progress * Math.PI * 0.5) * 2.2;
+
+      if (progress < 0.45) {
+        const p1 = progress / 0.45;
+        this.lockGroup.position.z = 0.45 + p1 * 0.8;
+        this.lockGroup.rotation.z = p1 * 0.6;
+        this.lockGroup.scale.setScalar(1 - p1 * 0.4);
+      } else {
+        this.lockGroup.visible = false;
+      }
+
+      if (progress > 0.3) {
+        const p2 = (progress - 0.3) / 0.7;
+        const eased = Math.pow(p2, 2.4);
+        this.coverPivot.rotation.y = -eased * (Math.PI * 0.85);
+
+        this.dustMat.opacity = Math.sin(p2 * Math.PI) * 0.9;
+        const pos = this.dustGeo.attributes.position.array;
+        for (let i = 0; i < this.dustVelocities.length; i++) {
+          pos[i * 3] += this.dustVelocities[i].x;
+          pos[i * 3 + 1] += this.dustVelocities[i].y;
+          pos[i * 3 + 2] += this.dustVelocities[i].z;
+        }
+        this.dustGeo.attributes.position.needsUpdate = true;
+      }
+
+      if (progress < 1) {
+        requestAnimationFrame(animateUnlock);
+      } else {
+        this.unlocked = true;
+        this.isUnlocking = false;
+        if (typeof this.onUnlocked === 'function') {
+          this.onUnlocked();
+        }
+      }
+    };
+
+    requestAnimationFrame(animateUnlock);
+  }
+
+  animate() {
+    requestAnimationFrame(() => this.animate());
+
+    const time = this.clock.getElapsedTime();
+
+    this.mouse.x += (this.mouse.targetX - this.mouse.x) * 0.05;
+    this.mouse.y += (this.mouse.targetY - this.mouse.y) * 0.05;
+
+    this.universeGroup.rotation.y = this.mouse.x * 0.15;
+    this.universeGroup.rotation.x = this.mouse.y * 0.15;
+
+    if (this.distantPlanet) {
+      this.distantPlanet.rotation.y += 0.002;
+    }
+
+    if (!this.isUnlocking) {
+      this.bookGroup.position.y = Math.sin(time * 1.4) * 0.12;
+      this.bookGroup.rotation.x = 0.2 + this.mouse.y * 0.18;
+      this.bookGroup.rotation.y = -0.28 + this.mouse.x * 0.22 + Math.cos(time * 0.9) * 0.04;
+    }
+
+    this.renderer.render(this.scene, this.camera);
+  }
+
+  destroy() {
+    if (this.renderer && this.renderer.domElement) {
+      this.renderer.dispose();
+      this.container.innerHTML = '';
+    }
+  }
+}
+
+/* =========================================================================
+   4. RENDERIZAÇÃO DAS TELAS E NAVEGAÇÃO
+   ========================================================================= */
+
+let activeSplashScene = null;
+let activeTabBookScene = null;
+
+function initSplash3D() {
+  const mount = document.getElementById('splash-canvas-mount');
+  if (mount && !activeSplashScene) {
+    activeSplashScene = new Book3DScene(mount, () => {
+      setTimeout(() => {
+        closeSplash(true);
+      }, 700);
+    });
+  }
+
+  document.getElementById('btn-unlock-splash').addEventListener('click', () => {
+    if (activeSplashScene) activeSplashScene.unlockCinematicSequence();
+  });
+
+  document.getElementById('btn-skip-splash').addEventListener('click', () => {
+    closeSplash(false);
+  });
+}
+
+function closeSplash(openReader) {
+  const splash = document.getElementById('splash-screen');
+  splash.classList.add('hidden');
+  if (openReader) {
+    state.activeTab = 'livro';
+    state.readerMode = true;
+  }
+  renderApp();
+}
+
+function renderApp() {
+  if (!state.me && !state.currentModal) {
+    state.currentModal = 'login';
+  }
+  renderSidebar();
+  renderRibbon();
+  renderContent();
+  renderModals();
+}
+
+function renderSidebar() {
+  const idSlot = document.getElementById('identity-slot');
+  if (state.me) {
+    const userEmp = state.employees.find(e => e.name === state.me);
+    idSlot.innerHTML = `
+      <div class="identity-card">
+        <div class="avatar">${getInitials(state.me)}</div>
+        <div class="identity-meta">
+          <b>${escapeHtml(state.me)}</b>
+          <span>${userEmp ? userEmp.points : 0} pts</span>
+        </div>
+        <button class="btn-switch-user" id="btn-trocar-user" title="Trocar conta">Trocar</button>
+      </div>
+    `;
+    document.getElementById('btn-trocar-user').addEventListener('click', () => {
+      state.currentModal = 'login';
+      renderApp();
+    });
+  } else {
+    idSlot.innerHTML = '';
+  }
+
+  const activeM = state.records.find(r => r.type === 'reuniao' && r.status === 'votacao');
+  const countVotacao = activeM ? 1 : 0;
+
+  const tabsSlot = document.getElementById('nav-tabs-slot');
+  tabsSlot.innerHTML = `
+    <button class="nav-item ${state.activeTab === 'placar' ? 'active' : ''}" data-tab="placar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+      Placar Geral
+    </button>
+    <button class="nav-item ${state.activeTab === 'reunioes' ? 'active' : ''}" data-tab="reunioes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 5l5 5M8 11l5 5M2 20l7-7M11 8l5-5 4 4-5 5z"/></svg>
+      Reuniões
+      ${countVotacao ? `<span class="nav-badge-count">${countVotacao}</span>` : ''}
+    </button>
+    <button class="nav-item ${state.activeTab === 'livro' ? 'active' : ''}" data-tab="livro">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 4.5A2.5 2.5 0 016.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15z"/></svg>
+      Livro de Regras
+    </button>
+    <button class="nav-item ${state.activeTab === 'historico' ? 'active' : ''}" data-tab="historico">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      Histórico
+    </button>
+    <button class="nav-item ${state.activeTab === 'config' ? 'active' : ''}" data-tab="config">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Configurações
+    </button>
+  `;
+
+  tabsSlot.querySelectorAll('.nav-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.activeTab = btn.dataset.tab;
+      state.openMeetingId = null;
+      renderApp();
+    });
+  });
+
+  document.getElementById('btn-acionar-slot').onclick = () => {
+    if (!state.me) {
+      state.currentModal = 'login';
+      renderApp();
+      return;
+    }
+    const hasActive = state.records.find(r => r.type === 'reuniao' && r.status === 'votacao');
+    if (hasActive) {
+      showToast('⚠️ Já existe uma sessão em andamento!');
+      state.activeTab = 'reunioes';
+      state.openMeetingId = hasActive.id;
+      renderApp();
+      return;
+    }
+    state.currentModal = 'acionar';
+    renderApp();
+  };
+}
+
+function renderRibbon() {
+  const ribbonSlot = document.getElementById('ribbon-slot');
+  const activeM = state.records.find(r => r.type === 'reuniao' && r.status === 'votacao');
+
+  if (activeM) {
+    ribbonSlot.innerHTML = `
+      <div class="ribbon-live">
+        <span class="pulse-dot"></span>
+        <span>Sessão em votação aberta — <b>Ata Nº ${String(activeM.numero).padStart(3, '0')}</b> convocada por ${escapeHtml(activeM.requester)}</span>
+        <button class="btn-ribbon-enter" id="btn-enter-room">Entrar na Sala &rarr;</button>
+      </div>
+    `;
+    document.getElementById('btn-enter-room').onclick = () => {
+      state.activeTab = 'reunioes';
+      state.openMeetingId = activeM.id;
+      renderApp();
+    };
+  } else {
+    ribbonSlot.innerHTML = '';
+  }
+}
+
+function renderContent() {
+  const content = document.getElementById('content-slot');
+
+  if (state.openMeetingId) {
+    const meeting = state.records.find(r => r.id === state.openMeetingId);
+    if (meeting) {
+      renderAtaRoom(content, meeting);
+      return;
+    }
+  }
+
+  switch (state.activeTab) {
+    case 'placar':
+      renderPlacar(content);
+      break;
+    case 'reunioes':
+      renderReunioes(content);
+      break;
+    case 'livro':
+      renderLivroView(content);
+      break;
+    case 'historico':
+      renderHistorico(content);
+      break;
+    case 'config':
+      renderConfig(content);
+      break;
+  }
+}
+
+function renderPlacar(container) {
+  const sorted = [...state.employees].sort((a, b) => b.points - a.points);
+  container.innerHTML = `
+    <div class="page-header">
+      <h1>Placar Geral</h1>
+      <p>Ranking e pontuação dos colaboradores da Octafin. Pontos são deduzidos quando a responsabilidade por um incidente é sacramentada pelo comitê.</p>
+    </div>
+    <div class="leaderboard">
+      ${sorted.map((emp, idx) => `
+        <div class="leader-row">
+          <div class="leader-rank ${idx === 0 ? 'top-1' : idx === 1 ? 'top-2' : idx === 2 ? 'top-3' : ''}">${idx + 1}</div>
+          <div class="avatar">${getInitials(emp.name)}</div>
+          <div class="leader-info">
+            <span class="leader-name">${escapeHtml(emp.name)}</span>
+            ${emp.name === state.me ? '<span class="you-badge">VOCÊ</span>' : ''}
+          </div>
+          <div class="leader-points ${emp.points < 0 ? 'neg' : ''}">${emp.points} pts</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderReunioes(container) {
+  const meetings = state.records
+    .filter(r => r.type === 'reuniao')
+    .sort((a, b) => b.createdAt - a.createdAt);
+
+  container.innerHTML = `
+    <div class="page-header">
+      <h1>Reuniões & Deliberações</h1>
+      <p>Acompanhe as sessões de acionamento em andamento, vote em sigilo e consulte os vereditos confirmados.</p>
+    </div>
+    ${meetings.length === 0 ? '<div style="text-align:center;padding:50px;color:var(--text-muted);">Nenhuma reunião registrada ainda.</div>' : `
+      <div class="meetings-list">
+        ${meetings.map(m => `
+          <div class="meeting-card" data-mid="${m.id}">
+            <div class="card-top">
+              <span class="card-ata-no">ATA Nº ${String(m.numero).padStart(3, '0')}</span>
+              <span class="badge-status ${m.status === 'votacao' ? 'votacao' : m.result}">
+                ${m.status === 'votacao' ? '● Em Votação' : m.result === 'culpado' ? 'Culpado' : 'Inocente'}
+              </span>
+            </div>
+            <div class="card-reason">${escapeHtml(m.reason)}</div>
+            <div class="card-meta">
+              <span>Acionado por: <b>${escapeHtml(m.requester)}</b></span>
+              <span>Acusado: <b>${escapeHtml(m.accused)}</b></span>
+              <span>Data: ${new Date(m.createdAt).toLocaleDateString('pt-BR')}</span>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `}
+  `;
+
+  container.querySelectorAll('.meeting-card').forEach(card => {
+    card.onclick = () => {
+      state.openMeetingId = card.dataset.mid;
+      renderApp();
+    };
+  });
+}
+
+function renderAtaRoom(container, m) {
+  const isRequester = state.me === m.requester;
+  const isAccused = state.me === m.accused;
+  const myVote = m.votes[state.me];
+  const votesList = Object.values(m.votes);
+  const totalVotes = votesList.length;
+  const guiltyVotes = votesList.filter(v => v === 'culpado').length;
+  const innocentVotes = votesList.filter(v => v === 'inocente').length;
+  const eligibleVoters = state.employees.filter(e => e.name !== m.accused).length;
+  const quorumMet = totalVotes >= state.settings.quorumMinimo;
+
+  container.innerHTML = `
+    <button class="btn-back-link" id="btn-back-meetings">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Voltar para Reuniões
+    </button>
+    <div class="ata-room">
+      <div class="ata-header">
+        <div>
+          <h2>Ata Nº ${String(m.numero).padStart(3, '0')}</h2>
+          <div class="ata-date">Aberta em ${new Date(m.createdAt).toLocaleString('pt-BR')} por ${escapeHtml(m.requester)}</div>
+        </div>
+        <span class="badge-status ${m.status === 'votacao' ? 'votacao' : m.result}">
+          ${m.status === 'votacao' ? '● Votação Aberta' : m.result === 'culpado' ? 'Responsabilidade Confirmada' : 'Absolvido'}
+        </span>
+      </div>
+
+      <div class="accused-banner">
+        <div class="avatar lg">${getInitials(m.accused)}</div>
+        <div class="accused-info">
+          <label>Colaborador Convocado (Acusado)</label>
+          <h3>${escapeHtml(m.accused)}</h3>
+        </div>
+      </div>
+
+      <div class="reason-callout">
+        <b>Motivo do Acionamento:</b><br>
+        ${escapeHtml(m.reason)}
+      </div>
+
+      <div class="chat-box">
+        <div class="chat-box-title">Debate da Sessão</div>
+        <div class="chat-box-desc">
+          ${(isRequester || isAccused)
+            ? 'Canal aberto exclusivamente entre acusador e acusado para alinhamento dos fatos.'
+            : 'Sessão pública para acompanhamento do time. Apenas as duas partes envolvidas podem manifestar-se.'}
+        </div>
+        <div class="chat-stream" id="chat-stream-el">
+          ${(m.chat && m.chat.length > 0) ? m.chat.map(c => `
+            <div class="chat-bubble ${c.author === m.requester ? 'from-req' : 'from-acc'}">
+              <div class="chat-author">${escapeHtml(c.author)} <span>(${c.author === m.requester ? 'Acusou' : 'Convocado'})</span></div>
+              <div>${escapeHtml(c.text)}</div>
+            </div>
+          `).join('') : '<div style="color:var(--text-faint);font-size:13px;padding:8px 0;">Nenhuma manifestação enviada ainda.</div>'}
+        </div>
+        ${(m.status === 'votacao' && (isRequester || isAccused)) ? `
+          <div class="chat-input-bar">
+            <input type="text" id="chat-text-input" placeholder="Escreva sua argumentação..." autocomplete="off">
+            <button class="btn-send-chat" id="btn-send-chat-msg">Enviar</button>
+          </div>
+        ` : ''}
+      </div>
+
+      <div class="voting-zone">
+        ${m.status === 'votacao' ? `
+          ${isAccused ? `
+            <div style="background:rgba(255,255,255,0.04);padding:16px;border-radius:var(--radius);color:var(--text-muted);font-size:14px;">
+              Você é o colaborador convocado nesta sessão e não vota. Acompanhe o debate e aguarde a apuração do comitê.
+            </div>
+          ` : myVote ? `
+            <div style="background:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.25);padding:16px;border-radius:var(--radius);color:#fff;font-size:14px;">
+              ✅ Seu voto foi registrado com sigilo: <b>${myVote === 'culpado' ? 'Culpado' : 'Inocente'}</b>.
+            </div>
+          ` : `
+            <h3 style="font-size:16px;margin-bottom:12px;color:#fff;">Registrar Voto Sigiloso</h3>
+            <div class="voting-buttons">
+              <button class="btn-vote-option vote-culpado" id="btn-vote-culpado">
+                <b>Culpado</b>
+                <span>Confirma o erro / infração</span>
+              </button>
+              <button class="btn-vote-option vote-inocente" id="btn-vote-inocente">
+                <b>Inocente</b>
+                <span>Não houve responsabilidade</span>
+              </button>
+            </div>
+          `}
+
+          <div style="margin-top:20px;">
+            <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-muted);">
+              <span>Quórum de Participação</span>
+              <span>${totalVotes} de ${eligibleVoters} votos (${Math.round((totalVotes / Math.max(1, eligibleVoters)) * 100)}%)</span>
+            </div>
+            <div class="vote-progress-bar">
+              <div class="vote-progress-fill" style="width:${Math.min(100, (totalVotes / Math.max(1, eligibleVoters)) * 100)}%;"></div>
+            </div>
+          </div>
+
+          ${isRequester ? `
+            <div style="margin-top:24px;border-top:1px solid var(--border);padding-top:20px;">
+              <button class="btn-action-primary" id="btn-close-session" ${quorumMet ? '' : 'disabled style="opacity:0.4;cursor:not-allowed;"'}>
+                Encerrar Votação e Apurar Resultados
+              </button>
+              ${!quorumMet ? `<p style="font-size:12px;color:var(--brand);margin-top:8px;">É necessário no mínimo ${state.settings.quorumMinimo} votos para sacramentar a ata (faltam ${state.settings.quorumMinimo - totalVotes}).</p>` : ''}
+            </div>
+          ` : ''}
+        ` : `
+          <div class="verdict-banner ${m.result}">
+            <h3>${m.result === 'culpado' ? 'Veredito: RESPONSABILIDADE CONFIRMADA' : 'Veredito: ABSOLVIÇÃO'}</h3>
+            <p>${m.result === 'culpado'
+              ? `${escapeHtml(m.accused)} perdeu ${Math.abs(m.pointsChange)} pontos no Placar Geral.`
+              : `Nenhum ponto foi retirado de ${escapeHtml(m.accused)}.`}</p>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;">
+            <div style="background:rgba(255,255,255,0.04);padding:14px;border-radius:var(--radius);">
+              <div style="font-size:12px;color:var(--red);">VOTOS CULPADO</div>
+              <div style="font-size:24px;font-weight:800;color:#fff;">${guiltyVotes} <span style="font-size:14px;color:var(--text-muted);">(${totalVotes ? Math.round((guiltyVotes / totalVotes) * 100) : 0}%)</span></div>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);padding:14px;border-radius:var(--radius);">
+              <div style="font-size:12px;color:var(--green);">VOTOS INOCENTE</div>
+              <div style="font-size:24px;font-weight:800;color:#fff;">${innocentVotes} <span style="font-size:14px;color:var(--text-muted);">(${totalVotes ? Math.round((innocentVotes / totalVotes) * 100) : 0}%)</span></div>
+            </div>
+          </div>
+
+          <div style="border-top:1px solid var(--border);padding-top:16px;">
+            <div style="font-size:12px;font-weight:700;color:var(--text-faint);text-transform:uppercase;margin-bottom:12px;">Votos Individuais Revelados</div>
+            ${Object.keys(m.votes).map(voter => `
+              <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13.5px;">
+                <span>${escapeHtml(voter)}</span>
+                <span class="badge-status ${m.votes[voter]}">${m.votes[voter] === 'culpado' ? 'Culpado' : 'Inocente'}</span>
+              </div>
+            `).join('')}
+          </div>
+        `}
+      </div>
+    </div>
+  `;
+
+  document.getElementById('btn-back-meetings').onclick = () => {
+    state.openMeetingId = null;
+    renderApp();
+  };
+
+  const voteC = document.getElementById('btn-vote-culpado');
+  if (voteC) voteC.onclick = () => castVote(m.id, 'culpado');
+
+  const voteI = document.getElementById('btn-vote-inocente');
+  if (voteI) voteI.onclick = () => castVote(m.id, 'inocente');
+
+  const btnSendChat = document.getElementById('btn-send-chat-msg');
+  const chatInput = document.getElementById('chat-text-input');
+  if (btnSendChat && chatInput) {
+    const handleSend = () => {
+      const text = chatInput.value.trim();
+      if (!text) return;
+      m.chat = m.chat || [];
+      m.chat.push({ author: state.me, text, at: Date.now() });
+      chatInput.value = '';
+      storageSet('records', state.records, true);
+      renderApp();
+    };
+    btnSendChat.onclick = handleSend;
+    chatInput.onkeydown = (e) => {
+      if (e.key === 'Enter') handleSend();
+    };
+  }
+
+  const btnClose = document.getElementById('btn-close-session');
+  if (btnClose && quorumMet) {
+    btnClose.onclick = () => closeMeetingSession(m.id);
+  }
+
+  const chatStream = document.getElementById('chat-stream-el');
+  if (chatStream) chatStream.scrollTop = chatStream.scrollHeight;
+}
+
+function renderLivroView(container) {
+  if (state.readerMode) {
+    const page = CODE_PAGES[state.readerPageIndex] || CODE_PAGES[0];
+    const total = CODE_PAGES.length;
+
+    container.innerHTML = `
+      <div class="page-header">
+        <h1>Livro de Regras &middot; Leitor Oficial</h1>
+        <p>Código de Conduta e Convivência Corporativa da Octafin.</p>
+      </div>
+
+      <div class="reader-container">
+        <div class="reader-progress-track">
+          <div class="reader-progress-bar" style="width:${((state.readerPageIndex + 1) / total) * 100}%"></div>
+        </div>
+
+        <div class="reader-paper-card" id="paper-card-el">
+          <div class="paper-page-content">
+            ${page.content}
+          </div>
+        </div>
+
+        <div class="reader-nav-controls">
+          <button class="btn-reader-nav" id="btn-reader-prev" ${state.readerPageIndex === 0 ? 'disabled' : ''}>&larr; Anterior</button>
+          <span style="color:#fff;font-size:13.5px;font-weight:700;">${state.readerPageIndex + 1} / ${total}</span>
+          <button class="btn-reader-nav primary" id="btn-reader-next" ${state.readerPageIndex === total - 1 ? 'disabled' : ''}>Próxima &rarr;</button>
+          <button class="btn-reader-nav" id="btn-reader-close-3d" style="margin-left:14px;">Fechar e Ver 3D</button>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('btn-reader-prev').onclick = () => {
+      if (state.readerPageIndex > 0) {
+        state.readerPageIndex--;
+        renderApp();
+      }
+    };
+    document.getElementById('btn-reader-next').onclick = () => {
+      if (state.readerPageIndex < total - 1) {
+        state.readerPageIndex++;
+        renderApp();
+      }
+    };
+    document.getElementById('btn-reader-close-3d').onclick = () => {
+      state.readerMode = false;
+      renderApp();
+    };
+  } else {
+    container.innerHTML = `
+      <div class="page-header">
+        <h1>Livro de Regras 3D</h1>
+        <p>Toque no cadeado-polvo para destrancar a experiência cinematográfica ou entre no leitor direto.</p>
+      </div>
+      <div class="book-module">
+        <div class="book-3d-stage" id="tab-book-canvas-mount"></div>
+        <div class="book-3d-overlay-hint">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          Clique no cadeado para abrir o livro ou arraste para girar a cena
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:20px;">
+        <button class="btn-action-primary" id="btn-direct-reader">Abrir Leitor Pautado Diretamente &rarr;</button>
+      </div>
+    `;
+
+    setTimeout(() => {
+      const mount = document.getElementById('tab-book-canvas-mount');
+      if (mount && !activeTabBookScene) {
+        activeTabBookScene = new Book3DScene(mount, () => {
+          setTimeout(() => {
+            state.readerMode = true;
+            renderApp();
+          }, 800);
+        });
+      }
+    }, 50);
+
+    document.getElementById('btn-direct-reader').onclick = () => {
+      state.readerMode = true;
+      renderApp();
+    };
+  }
+}
+
+function renderHistorico(container) {
+  const historyRecords = state.records
+    .filter(r => (r.type === 'reuniao' && r.status === 'encerrada') || r.type === 'ajuste')
+    .sort((a, b) => (b.closedAt || b.createdAt) - (a.closedAt || a.createdAt));
+
+  container.innerHTML = `
+    <div class="page-header">
+      <h1>Histórico de Sanções & Ajustes</h1>
+      <p>Registro auditável e irrevogável de todas as atas encerradas e pontuações conferidas na Octafin.</p>
+    </div>
+    ${historyRecords.length === 0 ? '<div style="text-align:center;padding:50px;color:var(--text-muted);">Nenhum registro no histórico.</div>' : `
+      <div class="meetings-list">
+        ${historyRecords.map(r => {
+          if (r.type === 'reuniao') {
+            return `
+              <div class="meeting-card" data-mid="${r.id}">
+                <div class="card-top">
+                  <span class="card-ata-no">ATA Nº ${String(r.numero).padStart(3, '0')}</span>
+                  <span class="badge-status ${r.result}">
+                    ${r.result === 'culpado' ? `Culpado (${r.pointsChange} pts)` : 'Inocente'}
+                  </span>
+                </div>
+                <div class="card-reason">${escapeHtml(r.reason)}</div>
+                <div class="card-meta">
+                  <span>Acusado: <b>${escapeHtml(r.accused)}</b></span>
+                  <span>Encerramento: ${new Date(r.closedAt).toLocaleDateString('pt-BR')}</span>
+                </div>
+              </div>
+            `;
+          } else {
+            return `
+              <div class="meeting-card" style="cursor:default;">
+                <div class="card-top">
+                  <span class="card-ata-no">Ajuste Manual de Pontos</span>
+                  <span class="badge-status ${r.delta >= 0 ? 'inocente' : 'culpado'}">
+                    ${r.delta >= 0 ? `+${r.delta} pts` : `${r.delta} pts`}
+                  </span>
+                </div>
+                <div class="card-reason">${escapeHtml(r.motivo || 'Ajuste administrativo')}</div>
+                <div class="card-meta">
+                  <span>Colaborador: <b>${escapeHtml(r.target)}</b></span>
+                  <span>Aplicado por: ${escapeHtml(r.by)}</span>
+                  <span>Data: ${new Date(r.createdAt).toLocaleDateString('pt-BR')}</span>
+                </div>
+              </div>
+            `;
+          }
+        }).join('')}
+      </div>
+    `}
+  `;
+
+  container.querySelectorAll('.meeting-card[data-mid]').forEach(card => {
+    card.onclick = () => {
+      state.openMeetingId = card.dataset.mid;
+      renderApp();
+    };
+  });
+}
+
+function renderConfig(container) {
+  const cfg = state.settings;
+  container.innerHTML = `
+    <div class="page-header">
+      <h1>Configurações do Sistema</h1>
+      <p>Gerenciamento de regras de votação, cadastro da equipe e ajustes manuais de pontuação.</p>
+    </div>
+
+    <div class="config-card">
+      <h3>Regras de Pontuação & Quórum</h3>
+      <p class="desc">Critérios matemáticos para julgamento das reuniões de acionamento.</p>
+      <div class="grid-2">
+        <div class="input-field">
+          <label>Pontos perdidos por infração confirmada</label>
+          <input type="number" id="cfg-pontos-input" value="${cfg.pontosPorInfracao}" min="1">
+        </div>
+        <div class="input-field">
+          <label>Quórum mínimo de votos para encerrar ata</label>
+          <input type="number" id="cfg-quorum-input" value="${cfg.quorumMinimo}" min="1">
+        </div>
+      </div>
+      <div style="margin-top:18px;text-align:right;">
+        <button class="btn-action-primary" id="btn-save-cfg">Salvar Regras</button>
+      </div>
+    </div>
+
+    <div class="config-card">
+      <h3>Colaboradores Ativos</h3>
+      <p class="desc">Membros da equipe que participam do placar e das votações.</p>
+      <div style="display:flex;gap:10px;margin-bottom:18px;">
+        <input type="text" id="new-emp-name-input" placeholder="Nome completo do novo colaborador..." style="flex:1;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:var(--radius-sm);color:#fff;">
+        <button class="btn-action-primary" id="btn-add-emp">Adicionar</button>
+      </div>
+      <div style="max-height:220px;overflow-y:auto;">
+        ${state.employees.map(e => `
+          <div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);">
+            <div class="avatar" style="width:28px;height:28px;font-size:11px;">${getInitials(e.name)}</div>
+            <span style="flex:1;font-size:13.5px;color:#fff;">${escapeHtml(e.name)}</span>
+            <span style="font-weight:700;font-size:14px;color:var(--brand);">${e.points} pts</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="config-card">
+      <h3>Ajuste Manual de Pontuação</h3>
+      <p class="desc">Aplicação de bônus ou penalidades extraordinárias.</p>
+      <div class="grid-2">
+        <div class="input-field">
+          <label>Colaborador</label>
+          <select id="adj-user-select">
+            <option value="">Selecione...</option>
+            ${state.employees.map(e => `<option value="${escapeHtml(e.name)}">${escapeHtml(e.name)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="input-field">
+          <label>Variação de Pontos (+ / -)</label>
+          <input type="number" id="adj-points-input" placeholder="Ex: -5 ou 10">
+        </div>
+      </div>
+      <div class="input-field" style="margin-top:14px;">
+        <label>Motivo do Ajuste</label>
+        <input type="text" id="adj-reason-input" placeholder="Justificativa do ajuste...">
+      </div>
+      <div style="margin-top:18px;text-align:right;">
+        <button class="btn-action-primary" id="btn-apply-adj">Aplicar Ajuste</button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('btn-save-cfg').onclick = async () => {
+    const p = parseInt(document.getElementById('cfg-pontos-input').value, 10);
+    const q = parseInt(document.getElementById('cfg-quorum-input').value, 10);
+    if (isNaN(p) || isNaN(q)) return;
+    state.settings.pontosPorInfracao = Math.max(1, p);
+    state.settings.quorumMinimo = Math.max(1, q);
+    await storageSet('settings', state.settings, true);
+    showToast('Regras salvas com sucesso!');
+  };
+
+  document.getElementById('btn-add-emp').onclick = async () => {
+    const input = document.getElementById('new-emp-name-input');
+    const name = input.value.trim();
+    if (!name) return;
+    if (state.employees.some(e => e.name.toLowerCase() === name.toLowerCase())) {
+      showToast('⚠️ Colaborador já cadastrado!');
+      return;
+    }
+    state.employees.push({ id: uid(), name, points: 0 });
+    await storageSet('employees', state.employees, true);
+    input.value = '';
+    showToast(`${name} adicionado ao time!`);
+    renderApp();
+  };
+
+  document.getElementById('btn-apply-adj').onclick = async () => {
+    const target = document.getElementById('adj-user-select').value;
+    const delta = parseInt(document.getElementById('adj-points-input').value, 10);
+    const motivo = document.getElementById('adj-reason-input').value.trim();
+    if (!target || isNaN(delta) || delta === 0) {
+      showToast('⚠️ Preencha colaborador e pontuação válida.');
+      return;
+    }
+    const emp = state.employees.find(e => e.name === target);
+    if (!emp) return;
+    emp.points += delta;
+    state.records.push({
+      id: uid(),
+      type: 'ajuste',
+      target,
+      delta,
+      motivo: motivo || 'Ajuste administrativo',
+      by: state.me || 'Administração',
+      createdAt: Date.now()
+    });
+    await Promise.all([
+      storageSet('employees', state.employees, true),
+      storageSet('records', state.records, true)
+    ]);
+    showToast('Ajuste aplicado com sucesso!');
+    renderApp();
+  };
+}
+
+/* =========================================================================
+   5. AÇÕES DE NEGÓCIO (Voto, Encerramento, Acionamento, Login)
+   ========================================================================= */
+
+async function castVote(meetingId, vote) {
+  const m = state.records.find(r => r.id === meetingId);
+  if (!m || m.status !== 'votacao') return;
+  if (m.accused === state.me) {
+    showToast('⚠️ O acusado não pode votar na própria sessão.');
+    return;
+  }
+  m.votes = m.votes || {};
+  m.votes[state.me] = vote;
+  await storageSet('records', state.records, true);
+  showToast('Voto registrado com sigilo!');
+  renderApp();
+}
+
+async function closeMeetingSession(meetingId) {
+  const m = state.records.find(r => r.id === meetingId);
+  if (!m || m.status !== 'votacao') return;
+  const votesList = Object.values(m.votes || {});
+  const total = votesList.length;
+  if (total < state.settings.quorumMinimo) {
+    showToast(`⚠️ Quórum insuficiente (${total}/${state.settings.quorumMinimo}).`);
+    return;
+  }
+  const guilty = votesList.filter(v => v === 'culpado').length;
+  const isGuilty = (guilty / total) >= (state.settings.percentualMaioria / 100);
+
+  m.status = 'encerrada';
+  m.closedAt = Date.now();
+  if (isGuilty) {
+    m.result = 'culpado';
+    m.pointsChange = -Math.abs(state.settings.pontosPorInfracao);
+    const accusedEmp = state.employees.find(e => e.name === m.accused);
+    if (accusedEmp) accusedEmp.points += m.pointsChange;
+  } else {
+    m.result = 'inocente';
+    m.pointsChange = 0;
+  }
+
+  await Promise.all([
+    storageSet('records', state.records, true),
+    storageSet('employees', state.employees, true)
+  ]);
+  showToast(isGuilty ? 'Sessão encerrada: Responsabilidade Confirmada!' : 'Sessão encerrada: Absolvido!');
+  renderApp();
+}
+
+/* =========================================================================
+   6. MODAIS (Login Interno, Acionar Reunião, Boas-Vindas)
+   ========================================================================= */
+
+function renderModals() {
+  const modalSlot = document.getElementById('modal-slot');
+  const welcomeSlot = document.getElementById('welcome-slot');
+
+  if (state.welcomeOverlay) {
+    const w = state.welcomeOverlay;
+    welcomeSlot.innerHTML = `
+      <div class="welcome-modal" id="welcome-modal-el">
+        <div class="welcome-card-content">
+          <div class="welcome-avatar-pulse">${getInitials(w.name)}</div>
+          <div style="font-size:14px;color:var(--text-muted);letter-spacing:0.06em;text-transform:uppercase;">Bem-vindo(a) de volta</div>
+          <h2 style="font-size:28px;font-weight:800;margin:4px 0 16px;">${escapeHtml(w.name)}</h2>
+          <div style="font-size:12px;letter-spacing:0.08em;color:var(--gold);font-weight:700;">SEU SALDO ATUAL</div>
+          <div class="welcome-points-val">${w.points} pts</div>
+          <div style="font-size:13px;color:var(--text-faint);margin-top:20px;">Clique em qualquer lugar para continuar</div>
+        </div>
+      </div>
+    `;
+    document.getElementById('welcome-modal-el').onclick = () => {
+      state.welcomeOverlay = null;
+      renderModals();
+    };
+    return;
+  } else {
+    welcomeSlot.innerHTML = '';
+  }
+
+  if (!state.currentModal) {
+    modalSlot.innerHTML = '';
+    return;
+  }
+
+  if (state.currentModal === 'login') {
+    modalSlot.innerHTML = `
+      <div class="modal-backdrop">
+        <div class="modal-panel">
+          <h2>Acesso Octafin</h2>
+          <p class="sub">Informe seu e-mail corporativo e senha para autenticar-se no Comitê.</p>
+          <div class="input-field" style="margin-bottom:14px;">
+            <label>E-mail corporativo</label>
+            <input type="email" id="login-email-input" placeholder="seu.nome@octafin.com.br" autocomplete="username">
+          </div>
+          <div class="input-field" style="margin-bottom:14px;">
+            <label>Senha de acesso</label>
+            <input type="password" id="login-pass-input" placeholder="••••••••" autocomplete="current-password">
+          </div>
+          <div id="login-error-msg" style="color:var(--red);font-size:13px;display:none;margin-bottom:12px;"></div>
+          <div class="modal-actions">
+            <button class="btn-action-primary" id="btn-submit-login" style="width:100%;">Entrar no Comitê</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const doLogin = async () => {
+      const email = document.getElementById('login-email-input').value.trim().toLowerCase();
+      const pass = document.getElementById('login-pass-input').value;
+      const user = USERS.find(u => u.email.toLowerCase() === email);
+
+      if (!user || user.password !== pass) {
+        const err = document.getElementById('login-error-msg');
+        err.textContent = 'E-mail ou senha incorretos.';
+        err.style.display = 'block';
+        return;
+      }
+
+      state.me = user.name;
+      await storageSet('my_name', user.name, false);
+
+      if (!state.employees.some(e => e.name === user.name)) {
+        state.employees.push({ id: uid(), name: user.name, points: 0 });
+        await storageSet('employees', state.employees, true);
+      }
+
+      const emp = state.employees.find(e => e.name === user.name);
+      state.currentModal = null;
+      state.welcomeOverlay = { name: user.name, points: emp ? emp.points : 0 };
+      renderApp();
+    };
+
+    document.getElementById('btn-submit-login').onclick = doLogin;
+    document.getElementById('login-pass-input').onkeydown = (e) => {
+      if (e.key === 'Enter') doLogin();
+    };
+  } else if (state.currentModal === 'acionar') {
+    const eligibleAccused = state.employees.filter(e => e.name !== state.me);
+    modalSlot.innerHTML = `
+      <div class="modal-backdrop">
+        <div class="modal-panel">
+          <h2>Acionar Reunião do Comitê</h2>
+          <p class="sub">Convoque o comitê relatando o incidente ocorrido e quem cometeu a falha.</p>
+          <div class="input-field" style="margin-bottom:14px;">
+            <label>Quem cometeu a infração / erro?</label>
+            <select id="ac-accused-select">
+              <option value="">Selecione um colaborador...</option>
+              ${eligibleAccused.map(e => `<option value="${escapeHtml(e.name)}">${escapeHtml(e.name)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="input-field" style="margin-bottom:14px;">
+            <label>Motivo detalhado do acionamento</label>
+            <textarea id="ac-reason-text" rows="4" placeholder="Descreva os fatos com clareza..." style="resize:none;"></textarea>
+          </div>
+          <div class="modal-actions">
+            <button class="btn-modal-cancel" id="btn-cancel-ac">Cancelar</button>
+            <button class="btn-action-primary" id="btn-confirm-ac">Abrir Sessão &rarr;</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('btn-cancel-ac').onclick = () => {
+      state.currentModal = null;
+      renderApp();
+    };
+
+    document.getElementById('btn-confirm-ac').onclick = async () => {
+      const accused = document.getElementById('ac-accused-select').value;
+      const reason = document.getElementById('ac-reason-text').value.trim();
+      if (!accused || !reason) {
+        showToast('⚠️ Preencha quem cometeu o erro e o motivo.');
+        return;
+      }
+
+      const maxNo = state.records
+        .filter(r => r.type === 'reuniao')
+        .reduce((max, r) => Math.max(max, r.numero || 0), 0);
+
+      const newMeeting = {
+        id: uid(),
+        type: 'reuniao',
+        numero: maxNo + 1,
+        requester: state.me,
+        accused,
+        reason,
+        status: 'votacao',
+        votes: {},
+        chat: [],
+        createdAt: Date.now()
+      };
+
+      state.records.push(newMeeting);
+      await storageSet('records', state.records, true);
+
+      state.currentModal = null;
+      state.activeTab = 'reunioes';
+      state.openMeetingId = newMeeting.id;
+      showToast('Sessão aberta! O time já pode entrar e votar.');
+      renderApp();
+    };
+  }
+}
+
+/* =========================================================================
+   7. INICIALIZAÇÃO & POLLING RESILIENTE A CADA 4 SEGUNDOS
+   ========================================================================= */
+
+async function startSystem() {
+  await loadData();
+  initSplash3D();
+  renderApp();
+
+  setInterval(async () => {
+    if (state.currentModal || state.activeTab === 'livro' || state.welcomeOverlay) return;
+    const chatInput = document.getElementById('chat-text-input');
+    if (chatInput && chatInput.value.trim().length > 0) return;
+
+    try {
+      await loadData();
+      renderApp();
+    } catch (e) {
+      console.warn('Sync polling:', e);
+    }
+  }, 4000);
+}
+
+window.addEventListener('DOMContentLoaded', startSystem);
+</script>
+</body>
+</html>
