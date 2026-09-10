@@ -3,21 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Comitê de Acionamento &middot; Octafin 3D Cósmico</title>
+<title>Comitê de Acionamento &middot; Octafin Cósmico</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Cinzel:wght@700;800&display=swap" rel="stylesheet">
 
-<!-- Three.js para o Universo 3D contínuo de fundo e Livro de Regras -->
+<!-- Three.js r128 para o Universo 3D Cósmico e Livro de Regras -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <style>
   :root {
-    --deep-space: #050811;
-    --bg-glass: rgba(13, 19, 33, 0.72);
-    --bg-glass-card: rgba(17, 24, 43, 0.75);
-    --bg-glass-hover: rgba(26, 38, 66, 0.82);
-    --sidebar-glass: rgba(9, 14, 26, 0.82);
+    --deep-space: #030509;
+    --bg-glass: rgba(10, 15, 29, 0.76);
+    --bg-glass-card: rgba(13, 20, 38, 0.78);
+    --bg-glass-hover: rgba(22, 33, 58, 0.86);
+    --sidebar-glass: rgba(7, 11, 22, 0.86);
     --border: rgba(148, 163, 184, 0.16);
     --border-strong: rgba(148, 163, 184, 0.32);
     --border-glow: rgba(34, 211, 238, 0.45);
@@ -33,9 +33,9 @@
     --blue-dark: #3753D6;
     --purple: #8B5CF6;
     --red: #F87171;
-    --red-soft: rgba(248, 113, 113, 0.14);
+    --red-soft: rgba(248, 113, 113, 0.15);
     --green: #34D399;
-    --green-soft: rgba(52, 211, 153, 0.14);
+    --green-soft: rgba(52, 211, 153, 0.15);
 
     --text: #F8FAFC;
     --text-muted: #94A3B8;
@@ -46,7 +46,7 @@
     --radius-sm: 10px;
     --radius-full: 9999px;
 
-    --shadow-card: 0 16px 40px -6px rgba(0, 0, 0, 0.65), 0 0 0 1px var(--border);
+    --shadow-card: 0 16px 40px -6px rgba(0, 0, 0, 0.75), 0 0 0 1px var(--border);
     --shadow-glow: 0 0 30px rgba(34, 211, 238, 0.25);
     --shadow-gold: 0 0 35px rgba(228, 195, 127, 0.35);
   }
@@ -62,7 +62,7 @@
     overflow-x: hidden;
   }
 
-  /* Canvas 3D de Espaço Cósmico Geral (Polvo Nadando, Nave Espacial, Planeta Explodindo) */
+  /* Canvas 3D de Espaço Cósmico Geral (NASA Realism) */
   #cosmic-3d-bg {
     position: fixed;
     inset: 0;
@@ -73,6 +73,7 @@
     display: block;
   }
 
+  /* Aplicação sobreposta ao 3D com transparência e glassmorphism */
   #app {
     position: relative;
     z-index: 10;
@@ -86,35 +87,60 @@
     font-family: inherit;
     font-size: inherit;
     outline: none;
+    color-scheme: dark;
   }
   button {
     cursor: pointer;
     transition: transform 0.15s ease, filter 0.15s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
   }
   button:active:not(:disabled) {
-    transform: scale(0.96);
+    transform: scale(0.97);
   }
 
-  /* EFEITO 3D PERSPECTIVE TILT */
+  /* FIX CRÍTICO: Dropdown Selects escuros com texto branco perfeitamente legível */
+  select {
+    background-color: #0d1527 !important;
+    color: #f8fafc !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  select option, select optgroup {
+    background-color: #0d1527 !important;
+    color: #f8fafc !important;
+    padding: 12px 14px !important;
+    font-size: 14px !important;
+  }
+  select option:checked, select option:hover {
+    background-color: #1e293b !important;
+    color: #22d3ee !important;
+  }
+
+  /* ================== EFEITOS 3D NOS ELEMENTOS (Ultra Otimizado / Zero Lag) ================== */
   .tilt-3d-parent {
-    perspective: 1100px;
+    perspective: 1200px;
   }
   .tilt-3d-card {
     transform-style: preserve-3d;
-    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateZ(var(--tz, 0px));
-    transition: transform 0.12s ease-out, box-shadow 0.2s ease, border-color 0.2s ease;
+    transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateZ(var(--tz, 0px));
+    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease;
     will-change: transform;
   }
-  .tilt-3d-card:hover {
-    --tz: 10px;
-    border-color: var(--border-glow);
-    box-shadow: 0 24px 50px -10px rgba(0, 0, 0, 0.7), 0 0 25px rgba(34, 211, 238, 0.15);
+  .tilt-3d-card.is-tilting {
+    transition: transform 0.04s linear, box-shadow 0.2s ease, border-color 0.2s ease !important;
   }
-  .pop-layer-1 { transform: translateZ(20px); }
-  .pop-layer-2 { transform: translateZ(38px); }
-  .pop-layer-3 { transform: translateZ(55px); }
+  .tilt-3d-card:hover {
+    --tz: 8px;
+    border-color: var(--border-glow);
+    box-shadow: 0 24px 50px -10px rgba(0, 0, 0, 0.75), 0 0 25px rgba(34, 211, 238, 0.15);
+  }
+  .pop-layer-1 { transform: translateZ(16px); }
+  .pop-layer-2 { transform: translateZ(30px); }
+  .pop-layer-3 { transform: translateZ(48px); }
 
-  /* Sidebar */
+  /* ================== Sidebar ================== */
   .sidebar {
     width: 270px;
     flex-shrink: 0;
@@ -207,45 +233,48 @@
     border: none;
     color: var(--text-muted);
     font-size: 11px;
-    padding: 4px 6px;
+    font-weight: 600;
+    padding: 4px 7px;
     border-radius: 6px;
   }
-  .btn-switch-user:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+  .btn-switch-user:hover { color: #fff; background: rgba(255,255,255,0.08); }
 
   nav.nav-tabs {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    margin-bottom: auto;
+    gap: 6px;
+    flex: 1;
   }
   .nav-item {
     display: flex;
     align-items: center;
-    gap: 11px;
-    padding: 10px 14px;
+    gap: 12px;
+    padding: 11px 14px;
     border-radius: var(--radius-sm);
-    color: var(--text-muted);
     background: transparent;
     border: 1px solid transparent;
+    color: var(--text-muted);
     font-size: 13.5px;
     font-weight: 600;
     text-align: left;
-    transition: all 0.15s ease;
+    width: 100%;
   }
-  .nav-item svg { width: 17px; height: 17px; flex-shrink: 0; }
-  .nav-item:hover { color: #fff; background: rgba(255, 255, 255, 0.06); }
+  .nav-item:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+  }
   .nav-item.active {
     color: #fff;
     background: rgba(34, 211, 238, 0.12);
     border-color: rgba(34, 211, 238, 0.3);
-    box-shadow: inset 0 0 16px rgba(34, 211, 238, 0.1);
+    box-shadow: 0 0 16px rgba(34, 211, 238, 0.15);
   }
-  .nav-item.active svg { color: var(--brand); }
+  .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
   .nav-badge-count {
     margin-left: auto;
-    background: var(--brand);
-    color: #07151F;
-    font-size: 10.5px;
+    background: var(--red);
+    color: #fff;
+    font-size: 11px;
     font-weight: 800;
     padding: 1px 7px;
     border-radius: var(--radius-full);
@@ -272,7 +301,7 @@
   }
   .btn-cta-acionar svg { width: 18px; height: 18px; }
 
-  /* Main Viewport */
+  /* ================== Main Viewport ================== */
   .main-viewport {
     flex: 1;
     min-width: 0;
@@ -292,6 +321,7 @@
     gap: 14px;
     font-size: 13.5px;
     color: #fff;
+    flex-wrap: wrap;
   }
   .pulse-dot {
     width: 9px;
@@ -305,8 +335,13 @@
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.35; transform: scale(0.85); }
   }
-  .btn-ribbon-enter {
+  .ribbon-actions {
     margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .btn-ribbon-enter {
     background: rgba(255, 255, 255, 0.12);
     color: #fff;
     border: 1px solid var(--border-strong);
@@ -316,9 +351,19 @@
     font-weight: 700;
   }
   .btn-ribbon-enter:hover { background: rgba(255, 255, 255, 0.22); }
+  .btn-ribbon-close {
+    background: rgba(248, 113, 113, 0.2);
+    color: #FCA5A5;
+    border: 1px solid rgba(248, 113, 113, 0.4);
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 12.5px;
+    font-weight: 700;
+  }
+  .btn-ribbon-close:hover { background: rgba(248, 113, 113, 0.35); color: #fff; }
 
   .content-container {
-    max-width: 860px;
+    max-width: 890px;
     width: 100%;
     margin: 0 auto;
     padding: 42px 30px 90px;
@@ -339,7 +384,7 @@
     max-width: 600px;
   }
 
-  /* Placar */
+  /* Placar 3D */
   .leaderboard {
     background: var(--bg-glass-card);
     border: 1px solid var(--border);
@@ -353,104 +398,91 @@
     display: flex;
     align-items: center;
     gap: 16px;
-    padding: 18px 22px;
+    padding: 16px 24px;
     border-bottom: 1px solid var(--border);
-    transition: background 0.15s ease;
+    transition: background 0.2s ease;
   }
   .leader-row:last-child { border-bottom: none; }
   .leader-row:hover { background: var(--bg-glass-hover); }
   .leader-rank {
-    width: 34px;
-    text-align: center;
+    width: 32px;
+    font-size: 15px;
     font-weight: 800;
-    font-size: 16px;
-    color: var(--text-faint);
-    flex-shrink: 0;
+    color: var(--text-muted);
+    text-align: center;
   }
-  .leader-rank.top-1 { color: var(--gold); text-shadow: 0 0 14px var(--gold-glow); }
-  .leader-rank.top-2 { color: #E2E8F0; }
-  .leader-rank.top-3 { color: #CD7F32; }
-  .leader-info { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; }
-  .leader-name { font-size: 15.5px; font-weight: 600; color: #fff; }
+  .leader-rank.top-1 { color: var(--gold); text-shadow: 0 0 14px var(--gold-glow); font-size: 18px; }
+  .leader-rank.top-2 { color: #E2E8F0; font-size: 17px; }
+  .leader-rank.top-3 { color: #D97706; font-size: 16px; }
+  .leader-info { flex: 1; min-width: 0; }
+  .leader-name { font-size: 15px; font-weight: 700; color: #fff; }
   .you-badge {
-    background: rgba(31, 191, 174, 0.15);
-    color: var(--teal);
-    border: 1px solid rgba(31, 191, 174, 0.3);
+    display: inline-block;
+    background: rgba(34, 211, 238, 0.15);
+    color: var(--brand);
+    border: 1px solid rgba(34, 211, 238, 0.35);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
     font-size: 10px;
     font-weight: 800;
-    padding: 2px 7px;
-    border-radius: var(--radius-full);
-    letter-spacing: 0.05em;
+    margin-left: 8px;
   }
   .leader-points {
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 800;
-    color: #fff;
-    min-width: 85px;
-    text-align: right;
+    color: var(--brand);
+    text-shadow: 0 0 16px var(--brand-glow);
   }
-  .leader-points.neg { color: var(--red); }
+  .leader-points.neg { color: var(--red); text-shadow: 0 0 16px rgba(248, 113, 113, 0.35); }
 
   /* Reuniões */
+  .meetings-list { display: flex; flex-direction: column; gap: 16px; }
   .meeting-card {
     background: var(--bg-glass-card);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 22px 24px;
-    margin-bottom: 16px;
-    cursor: pointer;
     box-shadow: var(--shadow-card);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
+    cursor: pointer;
   }
-  .card-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
-  .card-ata-no {
-    font-size: 12.5px;
-    font-weight: 700;
-    color: var(--text-faint);
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
+  .meeting-card:hover { border-color: var(--border-glow); }
+  .card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .card-ata-no { font-family: 'Cinzel', serif; font-size: 14px; font-weight: 700; color: var(--gold); letter-spacing: 0.05em; }
   .badge-status {
-    font-size: 11px;
-    font-weight: 800;
-    padding: 3px 10px;
+    padding: 4px 12px;
     border-radius: var(--radius-full);
-    letter-spacing: 0.02em;
+    font-size: 12px;
+    font-weight: 700;
   }
-  .badge-status.votacao {
-    background: rgba(34, 211, 238, 0.16);
-    color: var(--brand);
-    border: 1px solid rgba(34, 211, 238, 0.35);
-  }
-  .badge-status.culpado {
-    background: var(--red-soft);
-    color: var(--red);
-    border: 1px solid rgba(248, 113, 113, 0.35);
-  }
-  .badge-status.inocente {
-    background: var(--green-soft);
-    color: var(--green);
-    border: 1px solid rgba(52, 211, 153, 0.35);
-  }
-  .card-reason { font-size: 14.5px; color: var(--text); margin-bottom: 12px; line-height: 1.5; }
-  .card-meta { font-size: 12.5px; color: var(--text-muted); display: flex; gap: 16px; flex-wrap: wrap; }
+  .badge-status.votacao { background: rgba(76, 111, 255, 0.18); color: #93C5FD; border: 1px solid rgba(76, 111, 255, 0.4); }
+  .badge-status.culpado { background: var(--red-soft); color: var(--red); border: 1px solid rgba(248, 113, 113, 0.3); }
+  .badge-status.inocente { background: var(--green-soft); color: var(--green); border: 1px solid rgba(52, 211, 153, 0.3); }
+  .badge-status.cancelada { background: rgba(148, 163, 184, 0.15); color: var(--text-muted); border: 1px solid var(--border); }
+  .card-reason { font-size: 15px; color: #fff; margin-bottom: 14px; line-height: 1.5; }
+  .card-meta { display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--text-muted); flex-wrap: wrap; gap: 10px; }
   .card-meta b { color: #fff; }
+  .btn-quick-close {
+    background: rgba(248, 113, 113, 0.18);
+    color: #F87171;
+    border: 1px solid rgba(248, 113, 113, 0.4);
+    padding: 5px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .btn-quick-close:hover { background: rgba(248, 113, 113, 0.32); color: #fff; }
 
-  /* Detalhe da Ata */
+  /* Sala de Ata */
   .ata-room {
     background: var(--bg-glass-card);
-    border: 1px solid rgba(34, 211, 238, 0.3);
+    border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    padding: 34px 38px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 30px rgba(34, 211, 238, 0.12);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+    padding: 34px;
+    box-shadow: var(--shadow-card);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
   }
   .btn-back-link {
     background: none;
@@ -461,19 +493,12 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    margin-bottom: 22px;
+    margin-bottom: 20px;
   }
   .btn-back-link:hover { color: #fff; }
-  .ata-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 22px;
-  }
-  .ata-header h2 { font-size: 24px; font-weight: 800; color: #fff; }
-  .ata-header .ata-date { font-size: 12.5px; color: var(--text-faint); margin-top: 4px; }
+  .ata-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+  .ata-header h2 { font-family: 'Cinzel', serif; font-size: 24px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+  .ata-date { font-size: 13px; color: var(--text-muted); }
   .accused-banner {
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid var(--border);
@@ -481,21 +506,63 @@
     padding: 16px 20px;
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 16px;
     margin-bottom: 24px;
   }
-  .accused-info label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-faint); }
-  .accused-info h3 { font-size: 17px; font-weight: 700; color: #fff; }
+  .accused-info label { font-size: 11.5px; color: var(--gold); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; }
+  .accused-info h3 { font-size: 18px; font-weight: 800; color: #fff; }
   .reason-callout {
-    border-left: 3px solid var(--brand);
-    padding: 12px 18px;
     background: rgba(34, 211, 238, 0.05);
-    border-radius: 0 8px 8px 0;
+    border-left: 3px solid var(--brand);
+    padding: 14px 18px;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    color: #fff;
     font-size: 14.5px;
-    line-height: 1.6;
-    color: #F1F5F9;
-    margin-bottom: 28px;
+    line-height: 1.55;
+    margin-bottom: 26px;
   }
+
+  /* Painel de Controle e Botão de Encerramento */
+  .meeting-control-panel {
+    background: linear-gradient(135deg, rgba(248, 113, 113, 0.12), rgba(15, 23, 42, 0.6));
+    border: 1px solid rgba(248, 113, 113, 0.35);
+    border-radius: var(--radius);
+    padding: 18px 22px;
+    margin-bottom: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .control-info { min-width: 220px; flex: 1; }
+  .control-title { font-size: 15px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px; }
+  .control-sub { font-size: 12.5px; color: var(--text-muted); margin-top: 3px; }
+  .control-actions { display: flex; align-items: center; gap: 10px; }
+  .btn-close-meeting-danger {
+    background: linear-gradient(135deg, #EF4444 0%, #B91C1C 100%);
+    color: #fff;
+    border: none;
+    font-weight: 700;
+    font-size: 13.5px;
+    padding: 10px 18px;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-close-meeting-danger:hover { filter: brightness(1.15); box-shadow: 0 6px 22px rgba(239, 68, 68, 0.6); }
+  .btn-cancel-meeting-soft {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 13px;
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+  }
+  .btn-cancel-meeting-soft:hover { color: #fff; background: rgba(255, 255, 255, 0.15); }
 
   .chat-box {
     border-top: 1px solid var(--border);
@@ -535,7 +602,6 @@
     text-align: right;
   }
   .chat-author { font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; }
-  .chat-author span { font-size: 10px; opacity: 0.7; }
   .chat-input-bar { display: flex; gap: 10px; }
   .chat-input-bar input {
     flex: 1;
@@ -593,9 +659,10 @@
   .verdict-banner { padding: 20px 24px; border-radius: var(--radius); margin-bottom: 24px; }
   .verdict-banner.culpado { background: var(--red-soft); border: 1px solid rgba(248, 113, 113, 0.4); color: var(--red); }
   .verdict-banner.inocente { background: var(--green-soft); border: 1px solid rgba(52, 211, 153, 0.4); color: var(--green); }
+  .verdict-banner.cancelada { background: rgba(148, 163, 184, 0.12); border: 1px solid var(--border); color: var(--text-muted); }
   .verdict-banner h3 { font-size: 18px; font-weight: 800; margin-bottom: 4px; }
 
-  /* LIVRO DE REGRAS 3D NA ABA */
+  /* ================== LIVRO DE REGRAS 3D (Aba Dedicada) ================== */
   .book-stage-wrapper {
     position: relative;
     width: 100%;
@@ -603,8 +670,8 @@
     border-radius: var(--radius-lg);
     overflow: hidden;
     border: 1px solid rgba(34, 211, 238, 0.35);
-    background: rgba(8, 12, 22, 0.85);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(34, 211, 238, 0.15);
+    background: radial-gradient(ellipse at center, #0B1120 0%, #03060C 100%);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(34, 211, 238, 0.15);
   }
   .book-3d-canvas-mount {
     position: absolute;
@@ -629,14 +696,14 @@
     border: none;
     font-weight: 800;
     font-size: 14.5px;
-    padding: 13px 26px;
+    padding: 13px 28px;
     border-radius: var(--radius-full);
     box-shadow: 0 10px 30px var(--gold-glow);
     display: flex;
     align-items: center;
     gap: 10px;
   }
-  .btn-unlock-book-tab:hover { filter: brightness(1.1); transform: translateY(-2px); }
+  .btn-unlock-book-tab:hover { filter: brightness(1.12); transform: translateY(-2px); }
 
   /* Leitor Pautado */
   .reader-container {
@@ -646,7 +713,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: rgba(10, 15, 28, 0.9);
+    background: rgba(10, 15, 28, 0.92);
     backdrop-filter: blur(20px);
     border-radius: var(--radius-lg);
     border: 1px solid var(--border);
@@ -696,7 +763,7 @@
   .btn-reader-nav:disabled { opacity: 0.35; cursor: not-allowed; }
   .btn-reader-nav.primary { background: linear-gradient(135deg, var(--gold-light), var(--gold)); color: #161C28; border: none; box-shadow: 0 4px 16px var(--gold-glow); }
 
-  /* Configurações */
+  /* ================== Configurações ================== */
   .config-card {
     background: var(--bg-glass-card);
     border: 1px solid var(--border);
@@ -733,12 +800,12 @@
     box-shadow: 0 6px 18px rgba(31, 191, 174, 0.3);
   }
 
-  /* Modais */
+  /* ================== Modais ================== */
   .modal-backdrop {
     position: fixed;
     inset: 0;
     z-index: 500;
-    background: rgba(4, 7, 14, 0.82);
+    background: rgba(3, 6, 12, 0.85);
     backdrop-filter: blur(10px);
     display: flex;
     align-items: center;
@@ -750,8 +817,8 @@
     border: 1px solid rgba(34, 211, 238, 0.35);
     border-radius: var(--radius-lg);
     width: 100%;
-    max-width: 480px;
-    padding: 34px 34px 28px;
+    max-width: 500px;
+    padding: 34px;
     box-shadow: 0 25px 70px rgba(0, 0, 0, 0.85), 0 0 30px rgba(34, 211, 238, 0.15);
     backdrop-filter: blur(20px);
   }
@@ -765,7 +832,7 @@
     position: fixed;
     inset: 0;
     z-index: 600;
-    background: radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.15), rgba(4, 7, 14, 0.9) 70%);
+    background: radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.15), rgba(3, 5, 10, 0.92) 70%);
     backdrop-filter: blur(12px);
     display: flex;
     align-items: center;
@@ -837,7 +904,7 @@
 </head>
 <body>
 
-<!-- CANVAS 3D GLOBAL: UNIVERSO, POLVO CÓSMICO, NAVE ESPACIAL E PLANETA EXPLODINDO -->
+<!-- CANVAS 3D GLOBAL: UNIVERSO CÓSMICO NASA STYLE -->
 <canvas id="cosmic-3d-bg"></canvas>
 
 <!-- SISTEMA PRINCIPAL -->
@@ -879,7 +946,7 @@
 
 <script>
 /* =========================================================================
-   1. UNIVERSO 3D DE FUNDO (POLVO CÓSMICO + NAVE ESPACIAL + PLANETA EXPLODINDO)
+   1. UNIVERSO 3D DE FUNDO REALISTA (NASA AESTHETICS)
    ========================================================================= */
 
 class FullSpace3DUniverse {
@@ -887,7 +954,7 @@ class FullSpace3DUniverse {
     this.canvas = document.getElementById('cosmic-3d-bg');
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-    this.camera.position.set(0, 0, 24);
+    this.camera.position.set(0, 0, 26);
 
     this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true, alpha: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -898,6 +965,7 @@ class FullSpace3DUniverse {
 
     this.initLights();
     this.initStarfield();
+    this.initNebulaClouds();
     this.initCosmicOctopus();
     this.initSpaceship();
     this.initExplodingPlanet();
@@ -906,97 +974,184 @@ class FullSpace3DUniverse {
   }
 
   initLights() {
-    const amb = new THREE.AmbientLight(0x1B243B, 1.8);
+    // Luz ambiente suave e realista do vácuo estelar
+    const amb = new THREE.AmbientLight(0x131B2E, 1.4);
     this.scene.add(amb);
 
-    this.cyanLight = new THREE.DirectionalLight(0x22D3EE, 2.5);
-    this.cyanLight.position.set(-15, 10, 10);
-    this.scene.add(this.cyanLight);
+    // Luz direcional simulando estrela principal distante (sol)
+    this.sunLight = new THREE.DirectionalLight(0xFDFBF7, 2.4);
+    this.sunLight.position.set(20, 15, 12);
+    this.scene.add(this.sunLight);
 
-    this.goldLight = new THREE.DirectionalLight(0xE4C37F, 3.0);
-    this.goldLight.position.set(15, -8, 12);
-    this.scene.add(this.goldLight);
+    // Reflexo azulado da nebulosa cósmica
+    this.rimLight = new THREE.DirectionalLight(0x1FBFAE, 1.6);
+    this.rimLight.position.set(-20, -10, 8);
+    this.scene.add(this.rimLight);
+  }
 
-    this.planetFlash = new THREE.PointLight(0xFF5500, 3.5, 40);
-    this.planetFlash.position.set(16, 7, -8);
-    this.scene.add(this.planetFlash);
+  /* Textura procedural para partículas e brilhos estelares */
+  createStarTexture() {
+    const c = document.createElement('canvas');
+    c.width = 64; c.height = 64;
+    const ctx = c.getContext('2d');
+    const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    grad.addColorStop(0, 'rgba(255,255,255,1)');
+    grad.addColorStop(0.2, 'rgba(230,245,255,0.85)');
+    grad.addColorStop(0.5, 'rgba(100,200,255,0.25)');
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 64, 64);
+    return new THREE.CanvasTexture(c);
   }
 
   initStarfield() {
     this.starGroup = new THREE.Group();
-    const starCounts = [900, 500, 250];
-    const colors = [0xFFFFFF, 0xA5F3FC, 0xFDE68A];
-    const sizes = [0.08, 0.12, 0.18];
+    const starTex = this.createStarTexture();
 
-    starCounts.forEach((count, i) => {
+    // Estrelas com diferentes espectros (O, B, A, G, M) e profundidades
+    const layers = [
+      { count: 1200, size: 0.16, color: 0xF8FAFC, depth: 70 },
+      { count: 600,  size: 0.28, color: 0x93C5FD, depth: 55 },
+      { count: 250,  size: 0.45, color: 0xFDE68A, depth: 40 }
+    ];
+
+    layers.forEach(l => {
       const geo = new THREE.BufferGeometry();
-      const pos = new Float32Array(count * 3);
-      for (let j = 0; j < count * 3; j += 3) {
-        pos[j] = (Math.random() - 0.5) * 110;
-        pos[j + 1] = (Math.random() - 0.5) * 80;
-        pos[j + 2] = -10 - Math.random() * 50 - i * 20;
+      const pos = new Float32Array(l.count * 3);
+      for (let j = 0; j < l.count * 3; j += 3) {
+        pos[j] = (Math.random() - 0.5) * 160;
+        pos[j + 1] = (Math.random() - 0.5) * 110;
+        pos[j + 2] = -15 - Math.random() * l.depth;
       }
       geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
       const mat = new THREE.PointsMaterial({
-        color: colors[i],
-        size: sizes[i],
+        color: l.color,
+        size: l.size,
+        map: starTex,
         transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
         opacity: 0.85
       });
       this.starGroup.add(new THREE.Points(geo, mat));
     });
+
     this.scene.add(this.starGroup);
   }
 
-  /* 1. POLVO CÓSMICO 3D (Nada suavemente pelo fundo do espaço) */
+  /* Nuvens de Nebulosa Procedural NASA Deep Field */
+  initNebulaClouds() {
+    const c = document.createElement('canvas');
+    c.width = 512; c.height = 512;
+    const ctx = c.getContext('2d');
+    const grad = ctx.createRadialGradient(256, 256, 10, 256, 256, 250);
+    grad.addColorStop(0, 'rgba(34, 211, 238, 0.22)');
+    grad.addColorStop(0.4, 'rgba(76, 111, 255, 0.14)');
+    grad.addColorStop(0.7, 'rgba(139, 92, 246, 0.08)');
+    grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 512, 512);
+
+    const nebTex = new THREE.CanvasTexture(c);
+    const nebGeo = new THREE.PlaneGeometry(85, 65);
+    const nebMat = new THREE.MeshBasicMaterial({
+      map: nebTex,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      opacity: 0.55
+    });
+
+    const nebula1 = new THREE.Mesh(nebGeo, nebMat);
+    nebula1.position.set(-18, 6, -30);
+    this.scene.add(nebula1);
+
+    const nebula2 = new THREE.Mesh(nebGeo, nebMat.clone());
+    nebula2.position.set(22, -12, -35);
+    nebula2.rotation.z = Math.PI * 0.4;
+    nebula2.material.opacity = 0.4;
+    this.scene.add(nebula2);
+  }
+
+  /* 1. POLVO CÓSMICO (Bioluminescent Celestial Leviathan) */
   initCosmicOctopus() {
     this.octopus = new THREE.Group();
 
-    // Cabeça do polvo
-    const headGeo = new THREE.SphereGeometry(1.6, 32, 24);
-    headGeo.scale(1.1, 0.9, 1.4);
+    // Cabeça orgânica aerodinâmica com brilho bioluminescente
+    const headGeo = new THREE.SphereGeometry(1.8, 32, 28);
+    headGeo.scale(1.0, 0.85, 1.45);
+
+    // Textura procedural com veias de luz cyan/gold no manto
+    const c = document.createElement('canvas');
+    c.width = 256; c.height = 256;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#061324';
+    ctx.fillRect(0, 0, 256, 256);
+    ctx.strokeStyle = '#22D3EE';
+    ctx.lineWidth = 3;
+    ctx.shadowColor = '#22D3EE';
+    ctx.shadowBlur = 10;
+    for (let i = 0; i < 7; i++) {
+      ctx.beginPath();
+      ctx.arc(36 * i + 20, 128, 45, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    const octoTex = new THREE.CanvasTexture(c);
+
     const octoMat = new THREE.MeshStandardMaterial({
-      color: 0x0F2942,
-      roughness: 0.35,
-      metalness: 0.6,
-      emissive: 0x071524
+      color: 0x0A192F,
+      map: octoTex,
+      roughness: 0.25,
+      metalness: 0.7,
+      emissive: 0x052B3A,
+      emissiveIntensity: 0.6
     });
+
     this.octoHead = new THREE.Mesh(headGeo, octoMat);
     this.octopus.add(this.octoHead);
 
-    // Olhos azuis brilhantes
-    const eyeGeo = new THREE.SphereGeometry(0.24, 16, 16);
-    const eyeMat = new THREE.MeshBasicMaterial({ color: 0x22D3EE });
+    // Olhos cósmicos azuis profundos
+    const eyeGeo = new THREE.SphereGeometry(0.28, 20, 20);
+    const eyeMat = new THREE.MeshStandardMaterial({
+      color: 0x22D3EE,
+      emissive: 0x22D3EE,
+      emissiveIntensity: 1.2,
+      roughness: 0.1
+    });
     const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
-    leftEye.position.set(-0.65, 0.25, 1.2);
+    leftEye.position.set(-0.75, 0.25, 1.25);
     const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
-    rightEye.position.set(0.65, 0.25, 1.2);
+    rightEye.position.set(0.75, 0.25, 1.25);
     this.octopus.add(leftEye);
     this.octopus.add(rightEye);
 
-    // 8 Tentáculos tridimensionais articulados
+    // 8 Tentáculos tridimensionais com ventosas douradas e nós bioluminescentes
     this.tentacles = [];
-    const goldSuckerMat = new THREE.MeshStandardMaterial({
+    const suckerMat = new THREE.MeshStandardMaterial({
       color: 0xE4C37F,
-      metalness: 0.8,
-      roughness: 0.25
+      emissive: 0xE4C37F,
+      emissiveIntensity: 0.5,
+      metalness: 0.9,
+      roughness: 0.2
     });
 
     for (let t = 0; t < 8; t++) {
       const angle = (t / 8) * Math.PI * 2;
       const tentacleGroup = new THREE.Group();
-      tentacleGroup.position.set(Math.cos(angle) * 1.1, -0.4, Math.sin(angle) * 0.9);
+      tentacleGroup.position.set(Math.cos(angle) * 1.2, -0.4, Math.sin(angle) * 1.0);
 
       const segments = [];
       let parent = tentacleGroup;
-      for (let s = 0; s < 7; s++) {
-        const segGeo = new THREE.CylinderGeometry(0.18 - s * 0.02, 0.22 - s * 0.02, 0.7, 12);
-        segGeo.translate(0, -0.35, 0);
+      for (let s = 0; s < 9; s++) {
+        const segGeo = new THREE.CylinderGeometry(0.18 - s * 0.016, 0.21 - s * 0.016, 0.65, 12);
+        segGeo.translate(0, -0.32, 0);
         const segMesh = new THREE.Mesh(segGeo, octoMat);
 
-        const sucker = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), goldSuckerMat);
-        sucker.position.set(0, -0.35, 0.16);
-        segMesh.add(sucker);
+        if (s % 2 === 0) {
+          const sucker = new THREE.Mesh(new THREE.SphereGeometry(0.08, 10, 10), suckerMat);
+          sucker.position.set(0, -0.32, 0.15);
+          segMesh.add(sucker);
+        }
 
         parent.add(segMesh);
         segments.push(segMesh);
@@ -1007,87 +1162,211 @@ class FullSpace3DUniverse {
       this.tentacles.push({ group: tentacleGroup, segments, baseAngle: angle });
     }
 
-    this.octopus.position.set(-18, -4, -6);
-    this.octopus.scale.setScalar(1.2);
+    this.octopus.position.set(-22, -6, -8);
+    this.octopus.scale.setScalar(1.35);
     this.scene.add(this.octopus);
   }
 
-  /* 2. NAVE ESPACIAL 3D */
+  /* 2. NAVE ESPACIAL REALISTA (NASA / ESA Deep Space Explorer) */
   initSpaceship() {
     this.ship = new THREE.Group();
 
-    const hullGeo = new THREE.ConeGeometry(0.7, 3.8, 4);
+    // Módulo de Comando (Fuselagem aerospacial em titânio e mantas térmicas)
+    const hullGeo = new THREE.CylinderGeometry(0.35, 0.55, 3.2, 16);
     hullGeo.rotateX(Math.PI / 2);
     const hullMat = new THREE.MeshStandardMaterial({
-      color: 0x1E293B,
-      roughness: 0.2,
-      metalness: 0.85
+      color: 0xE2E8F0,
+      metalness: 0.85,
+      roughness: 0.25
     });
     const hull = new THREE.Mesh(hullGeo, hullMat);
     this.ship.add(hull);
 
-    const wingGeo = new THREE.BoxGeometry(3.6, 0.06, 1.4);
-    const wingMat = new THREE.MeshStandardMaterial({
-      color: 0x0F172A,
-      metalness: 0.9,
-      roughness: 0.3
+    // Nariz aerodinâmico com sensor óptico
+    const noseGeo = new THREE.ConeGeometry(0.35, 1.1, 16);
+    noseGeo.rotateX(Math.PI / 2);
+    const nose = new THREE.Mesh(noseGeo, hullMat);
+    nose.position.set(0, 0, 2.15);
+    this.ship.add(nose);
+
+    // Painéis Solares Fotovoltaicos Articulados (Azul profundo espacial com grade dourada)
+    const solarWingGeo = new THREE.BoxGeometry(4.2, 0.04, 1.1);
+    const c = document.createElement('canvas');
+    c.width = 128; c.height = 64;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#0F1E36';
+    ctx.fillRect(0, 0, 128, 64);
+    ctx.strokeStyle = '#E4C37F';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < 128; x += 16) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 64); ctx.stroke(); }
+    for (let y = 0; y < 64; y += 16) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(128, y); ctx.stroke(); }
+    const solarTex = new THREE.CanvasTexture(c);
+
+    const solarMat = new THREE.MeshStandardMaterial({
+      map: solarTex,
+      metalness: 0.6,
+      roughness: 0.2
     });
-    const wings = new THREE.Mesh(wingGeo, wingMat);
-    wings.position.set(0, -0.1, -0.4);
+    const wings = new THREE.Mesh(solarWingGeo, solarMat);
+    wings.position.set(0, 0, -0.3);
     this.ship.add(wings);
 
-    const canopyGeo = new THREE.SphereGeometry(0.35, 16, 16);
-    canopyGeo.scale(0.8, 0.6, 1.8);
-    const canopyMat = new THREE.MeshBasicMaterial({ color: 0x22D3EE });
-    const canopy = new THREE.Mesh(canopyGeo, canopyMat);
-    canopy.position.set(0, 0.3, 0.3);
-    this.ship.add(canopy);
+    // Antena Parabólica de Alta Frequência (Deep Space Dish)
+    const dishGeo = new THREE.SphereGeometry(0.55, 16, 8, 0, Math.PI * 2, 0, Math.PI * 0.4);
+    const dishMat = new THREE.MeshStandardMaterial({ color: 0xF8FAFC, metalness: 0.7, roughness: 0.3, side: THREE.DoubleSide });
+    const dish = new THREE.Mesh(dishGeo, dishMat);
+    dish.position.set(0, 0.6, 0.4);
+    dish.rotation.x = -Math.PI * 0.3;
+    this.ship.add(dish);
 
-    const flameGeo = new THREE.ConeGeometry(0.3, 1.5, 12);
-    flameGeo.rotateX(-Math.PI / 2);
-    const flameMat = new THREE.MeshBasicMaterial({ color: 0x00F0FF, transparent: true, opacity: 0.85 });
-    this.thrusterFlame = new THREE.Mesh(flameGeo, flameMat);
-    this.thrusterFlame.position.set(0, 0, -2.4);
-    this.ship.add(this.thrusterFlame);
+    // Propulsor de Íons Xenon (Pluma de plasma azul/ciano de alta eficiência)
+    const engineBellGeo = new THREE.CylinderGeometry(0.28, 0.45, 0.6, 16);
+    engineBellGeo.rotateX(Math.PI / 2);
+    const engineMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.9, roughness: 0.2 });
+    const bell = new THREE.Mesh(engineBellGeo, engineMat);
+    bell.position.set(0, 0, -1.8);
+    this.ship.add(bell);
 
-    this.ship.position.set(-30, 8, -14);
-    this.ship.rotation.set(0.1, 0.9, -0.3);
+    // Pluma de Íon Brilhante
+    const plumeGeo = new THREE.ConeGeometry(0.24, 2.2, 16);
+    plumeGeo.rotateX(-Math.PI / 2);
+    const plumeMat = new THREE.MeshBasicMaterial({
+      color: 0x38BDF8,
+      transparent: true,
+      opacity: 0.85,
+      blending: THREE.AdditiveBlending
+    });
+    this.ionPlume = new THREE.Mesh(plumeGeo, plumeMat);
+    this.ionPlume.position.set(0, 0, -3.0);
+    this.ship.add(this.ionPlume);
+
+    // Luzes estroboscópicas de navegação (Verde estibordo, Vermelho bombordo, Branco cauda)
+    const lightMatG = new THREE.MeshBasicMaterial({ color: 0x22C55E });
+    const lightMatR = new THREE.MeshBasicMaterial({ color: 0xEF4444 });
+    const navRight = new THREE.Mesh(new THREE.SphereGeometry(0.07, 8, 8), lightMatG);
+    navRight.position.set(2.1, 0, -0.3);
+    const navLeft = new THREE.Mesh(new THREE.SphereGeometry(0.07, 8, 8), lightMatR);
+    navLeft.position.set(-2.1, 0, -0.3);
+    this.ship.add(navRight);
+    this.ship.add(navLeft);
+
+    this.ship.position.set(-45, 9, -20);
+    this.ship.rotation.set(0.12, 1.1, -0.22);
     this.scene.add(this.ship);
   }
 
-  /* 3. PLANETA EXPLODINDO 3D */
+  /* 3. PLANETA EXPLODINDO REALISTA (NASA Cataclysmic Exoplanet) */
   initExplodingPlanet() {
     this.planetGroup = new THREE.Group();
-    this.planetGroup.position.set(16, 7, -10);
+    this.planetGroup.position.set(22, 8, -22);
 
-    const coreGeo = new THREE.SphereGeometry(2.4, 32, 32);
+    // Textura procedural de alta fidelidade: Continentes basálticos com veios de magma
+    const c = document.createElement('canvas');
+    c.width = 512; c.height = 256;
+    const ctx = c.getContext('2d');
+
+    // Base vulcânica escura
+    ctx.fillStyle = '#220D0D';
+    ctx.fillRect(0, 0, 512, 256);
+
+    // Fissuras tectônicas incandescentes (veios de magma)
+    ctx.strokeStyle = '#FF5500';
+    ctx.lineWidth = 4;
+    ctx.shadowColor = '#FF9900';
+    ctx.shadowBlur = 12;
+    for (let i = 0; i < 16; i++) {
+      ctx.beginPath();
+      let x = Math.random() * 512;
+      let y = Math.random() * 256;
+      ctx.moveTo(x, y);
+      for (let step = 0; step < 6; step++) {
+        x += (Math.random() - 0.5) * 70;
+        y += (Math.random() - 0.5) * 50;
+        ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+    // Núcleo branco-quente das fissuras
+    ctx.strokeStyle = '#FFF3D6';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    const planetTex = new THREE.CanvasTexture(c);
+
+    // Esfera planetária com relevo e emissão de calor
+    const coreGeo = new THREE.SphereGeometry(3.0, 48, 48);
     const coreMat = new THREE.MeshStandardMaterial({
-      color: 0x991B1B,
-      emissive: 0xDC2626,
-      emissiveIntensity: 0.6,
-      roughness: 0.6
+      map: planetTex,
+      roughness: 0.55,
+      metalness: 0.2,
+      emissive: 0xB91C1C,
+      emissiveIntensity: 0.7
     });
     this.planetCore = new THREE.Mesh(coreGeo, coreMat);
     this.planetGroup.add(this.planetCore);
 
-    const ringGeo = new THREE.RingGeometry(2.6, 3.2, 36);
-    const ringMat = new THREE.MeshBasicMaterial({
+    // Atmosfera com Fresnel Glow (Rayleigh scattering azul/âmbar)
+    const atmosGeo = new THREE.SphereGeometry(3.22, 36, 36);
+    const atmosMat = new THREE.MeshBasicMaterial({
+      color: 0xFB923C,
+      transparent: true,
+      opacity: 0.28,
+      blending: THREE.AdditiveBlending,
+      side: THREE.BackSide
+    });
+    this.atmosphere = new THREE.Mesh(atmosGeo, atmosMat);
+    this.planetGroup.add(this.atmosphere);
+
+    // Anel planetário realista estilo Saturno com divisão de Cassini
+    const ringGeo = new THREE.RingGeometry(3.6, 6.2, 64);
+    const ringC = document.createElement('canvas');
+    ringC.width = 256; ringC.height = 1;
+    const rctx = ringC.getContext('2d');
+    const rgrad = rctx.createLinearGradient(0, 0, 256, 0);
+    rgrad.addColorStop(0, 'rgba(0,0,0,0)');
+    rgrad.addColorStop(0.15, 'rgba(217, 119, 6, 0.75)');
+    rgrad.addColorStop(0.55, 'rgba(245, 158, 11, 0.9)');
+    rgrad.addColorStop(0.65, 'rgba(0,0,0,0.1)'); // Divisão de Cassini
+    rgrad.addColorStop(0.72, 'rgba(217, 119, 6, 0.7)');
+    rgrad.addColorStop(1, 'rgba(0,0,0,0)');
+    rctx.fillStyle = rgrad;
+    rctx.fillRect(0, 0, 256, 1);
+    const ringTex = new THREE.CanvasTexture(ringC);
+
+    const ringMat = new THREE.MeshStandardMaterial({
+      map: ringTex,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.75,
+      roughness: 0.7
+    });
+    this.rings = new THREE.Mesh(ringGeo, ringMat);
+    this.rings.rotation.x = Math.PI * 0.42;
+    this.rings.rotation.y = Math.PI * 0.12;
+    this.planetGroup.add(this.rings);
+
+    // Onda de choque cósmica suave (Shockwave esférica em expansão)
+    const shockGeo = new THREE.RingGeometry(3.2, 4.4, 48);
+    const shockMat = new THREE.MeshBasicMaterial({
       color: 0xF97316,
       side: THREE.DoubleSide,
       transparent: true,
-      opacity: 0.7
+      opacity: 0.0,
+      blending: THREE.AdditiveBlending
     });
-    this.shockwave = new THREE.Mesh(ringGeo, ringMat);
-    this.shockwave.rotation.x = Math.PI / 2.3;
+    this.shockwave = new THREE.Mesh(shockGeo, shockMat);
+    this.shockwave.rotation.x = Math.PI * 0.35;
     this.planetGroup.add(this.shockwave);
 
-    this.debrisCount = 55;
+    // Fragmentos de rocha basáltica e brasas incandescentes
+    this.debrisCount = 70;
     this.debris = [];
-    const debrisGeo = new THREE.DodecahedronGeometry(0.16);
+    const debrisGeo = new THREE.DodecahedronGeometry(0.18);
     const debrisMat = new THREE.MeshStandardMaterial({
-      color: 0xF59E0B,
-      emissive: 0xB45309,
-      metalness: 0.4
+      color: 0x2A1515,
+      emissive: 0xEA580C,
+      emissiveIntensity: 0.85,
+      roughness: 0.8
     });
 
     for (let i = 0; i < this.debrisCount; i++) {
@@ -1097,10 +1376,10 @@ class FullSpace3DUniverse {
         (Math.random() - 0.5) * 2,
         (Math.random() - 0.5) * 2
       ).normalize();
-      const speed = 0.04 + Math.random() * 0.08;
-      d.position.copy(dir.clone().multiplyScalar(2.4));
+      const speed = 0.008 + Math.random() * 0.016; // Muito mais lento e cinematográfico!
+      d.position.copy(dir.clone().multiplyScalar(3.0));
       this.planetGroup.add(d);
-      this.debris.push({ mesh: d, dir, speed, dist: 2.4 });
+      this.debris.push({ mesh: d, dir, speed, dist: 3.0 });
     }
 
     this.scene.add(this.planetGroup);
@@ -1113,87 +1392,97 @@ class FullSpace3DUniverse {
       this.renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    const onMove = (clientX, clientY) => {
-      this.mouse.targetX = (clientX / window.innerWidth - 0.5) * 2.0;
-      this.mouse.targetY = (clientY / window.innerHeight - 0.5) * 2.0;
-
-      // EFEITO 3D TILT NOS CARDS
-      document.querySelectorAll('.tilt-3d-card').forEach(card => {
-        const rect = card.getBoundingClientRect();
-        if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
-          const rx = -((clientY - (rect.top + rect.height / 2)) / (rect.height / 2)) * 14;
-          const ry = ((clientX - (rect.left + rect.width / 2)) / (rect.width / 2)) * 14;
-          card.style.setProperty('--rx', `${rx.toFixed(2)}deg`);
-          card.style.setProperty('--ry', `${ry.toFixed(2)}deg`);
-        } else {
-          card.style.setProperty('--rx', '0deg');
-          card.style.setProperty('--ry', '0deg');
-        }
-      });
-    };
-
-    window.addEventListener('mousemove', (e) => onMove(e.clientX, e.clientY));
-    window.addEventListener('touchmove', (e) => {
-      if (e.touches.length > 0) onMove(e.touches[0].clientX, e.touches[0].clientY);
-    });
+    window.addEventListener('mousemove', (e) => {
+      this.mouse.targetX = (e.clientX / window.innerWidth - 0.5) * 2.0;
+      this.mouse.targetY = (e.clientY / window.innerHeight - 0.5) * 2.0;
+    }, { passive: true });
   }
 
   animate() {
     requestAnimationFrame(() => this.animate());
 
+    const delta = this.clock.getDelta();
     const time = this.clock.getElapsedTime();
 
-    this.mouse.x += (this.mouse.targetX - this.mouse.x) * 0.05;
-    this.mouse.y += (this.mouse.targetY - this.mouse.y) * 0.05;
+    // Parallax cósmico sutil e suave
+    this.mouse.x += (this.mouse.targetX - this.mouse.x) * 0.035;
+    this.mouse.y += (this.mouse.targetY - this.mouse.y) * 0.035;
 
-    this.camera.position.x = this.mouse.x * 2.2;
-    this.camera.position.y = -this.mouse.y * 1.8;
+    this.camera.position.x = this.mouse.x * 2.5;
+    this.camera.position.y = -this.mouse.y * 2.0;
     this.camera.lookAt(0, 0, 0);
 
-    this.starGroup.rotation.y = time * 0.015 + this.mouse.x * 0.05;
+    // Rotação suave do campo estelar
+    this.starGroup.rotation.y = time * 0.006 + this.mouse.x * 0.03;
 
-    // Polvo Cósmico
-    this.octopus.position.x = -18 + Math.sin(time * 0.35) * 14;
-    this.octopus.position.y = -3.5 + Math.cos(time * 0.5) * 2.5;
-    this.octopus.position.z = -6 + Math.sin(time * 0.25) * 4;
-    this.octopus.rotation.y = Math.cos(time * 0.35) * 0.4 + 0.3;
-    this.octopus.rotation.z = Math.sin(time * 0.4) * 0.15;
+    // 1. POLVO CÓSMICO (Nado majestoso em ciclo lento de 40s)
+    this.octopus.position.x = -22 + Math.sin(time * 0.16) * 14;
+    this.octopus.position.y = -6 + Math.cos(time * 0.22) * 3.2;
+    this.octopus.position.z = -8 + Math.sin(time * 0.12) * 5;
+    this.octopus.rotation.y = Math.cos(time * 0.16) * 0.35 + 0.3;
+    this.octopus.rotation.z = Math.sin(time * 0.18) * 0.12;
 
     this.tentacles.forEach((tData) => {
       tData.segments.forEach((seg, sIdx) => {
-        seg.rotation.z = Math.sin(time * 2.5 + sIdx * 0.45 + tData.baseAngle) * 0.18;
-        seg.rotation.x = Math.cos(time * 2.0 + sIdx * 0.4) * 0.14;
+        const wave = Math.sin(time * 1.4 + sIdx * 0.42 + tData.baseAngle) * 0.16;
+        seg.rotation.z = wave;
+        seg.rotation.x = Math.cos(time * 1.1 + sIdx * 0.38) * 0.12;
       });
     });
 
-    // Nave Espacial
-    this.ship.position.x = -28 + ((time * 7) % 65);
-    this.ship.position.y = 7 + Math.sin(time * 1.5) * 2.0;
-    this.ship.position.z = -14 + Math.cos(time * 1.2) * 3.0;
-    this.ship.rotation.z = -0.3 + Math.sin(time * 2.0) * 0.2;
-    this.thrusterFlame.scale.set(1 + Math.random() * 0.3, 1 + Math.random() * 0.4, 1 + Math.random() * 0.3);
+    // 2. NAVE ESPACIAL (Passagem orbital lenta e majestosa de ~55s)
+    const shipCycle = (time * 1.5) % 80;
+    this.ship.position.x = -45 + shipCycle * 1.15;
+    this.ship.position.y = 9 + Math.sin(time * 0.4) * 1.6;
+    this.ship.position.z = -20 + Math.cos(time * 0.3) * 2.5;
+    this.ship.rotation.z = -0.22 + Math.sin(time * 0.5) * 0.08;
+    this.ionPlume.scale.set(1 + Math.sin(time * 10) * 0.15, 1 + Math.cos(time * 12) * 0.2, 1);
 
-    // Planeta Explodindo
-    const cycle = (time * 0.65) % (Math.PI * 2);
-    const pulse = Math.sin(cycle);
-    this.planetCore.scale.setScalar(1 + Math.max(0, pulse) * 0.22);
-    this.shockwave.scale.setScalar(1 + (time * 1.8 % 3.5));
-    this.shockwave.material.opacity = Math.max(0, 1 - ((time * 1.8 % 3.5) / 3.5));
+    // 3. PLANETA EXPLODINDO (Ciclo super lento, dramático e realista de ~45s)
+    this.planetCore.rotation.y = time * 0.04;
+    this.rings.rotation.z = time * 0.02;
 
-    this.debris.forEach(d => {
-      d.dist += d.speed;
-      if (d.dist > 7.5) d.dist = 2.4;
-      d.mesh.position.copy(d.dir.clone().multiplyScalar(d.dist));
-      d.mesh.rotation.x += 0.05;
-      d.mesh.rotation.y += 0.05;
-    });
+    const explosionCycle = (time * 0.14) % 1.0; // 0.0 a 1.0 em ~45 segundos
+    if (explosionCycle < 0.35) {
+      // Fase 1: Calma e magma pulsando suavemente
+      this.planetCore.scale.setScalar(1.0 + Math.sin(time * 1.5) * 0.03);
+      this.shockwave.material.opacity = 0.0;
+      this.debris.forEach(d => {
+        d.dist = 3.0;
+        d.mesh.position.copy(d.dir.clone().multiplyScalar(d.dist));
+      });
+    } else if (explosionCycle < 0.75) {
+      // Fase 2: Cataclismo e ejeção de magma em câmera lenta
+      const p = (explosionCycle - 0.35) / 0.4;
+      this.planetCore.scale.setScalar(1.0 + Math.sin(p * Math.PI) * 0.18);
+
+      // Onda de choque sutil expandindo e dissipando
+      this.shockwave.scale.setScalar(1.0 + p * 4.5);
+      this.shockwave.material.opacity = Math.max(0, Math.sin(p * Math.PI) * 0.65);
+
+      // Fragmentos e brasas rochosas derivando lentamente
+      this.debris.forEach(d => {
+        d.dist += d.speed;
+        d.mesh.position.copy(d.dir.clone().multiplyScalar(d.dist));
+        d.mesh.rotation.x += 0.015;
+        d.mesh.rotation.y += 0.015;
+      });
+    } else {
+      // Fase 3: Resfriamento e rearme da simulação
+      const p3 = (explosionCycle - 0.75) / 0.25;
+      this.shockwave.material.opacity = 0.0;
+      this.debris.forEach(d => {
+        d.dist = THREE.MathUtils.lerp(d.dist, 3.0, p3);
+        d.mesh.position.copy(d.dir.clone().multiplyScalar(d.dist));
+      });
+    }
 
     this.renderer.render(this.scene, this.camera);
   }
 }
 
 /* =========================================================================
-   2. ESTADO GLOBAL & USUÁRIOS
+   2. ESTADO GLOBAL & USUÁRIOS OCTAFIN
    ========================================================================= */
 
 const USERS = [
@@ -1290,7 +1579,7 @@ function escapeHtml(str) {
 }
 
 /* =========================================================================
-   3. CÓDIGO DE CONDUTA (10 Páginas)
+   3. CÓDIGO DE CONDUTA (10 Páginas Completas)
    ========================================================================= */
 
 const CODE_PAGES = [
@@ -1385,15 +1674,15 @@ const CODE_PAGES = [
 ];
 
 /* =========================================================================
-   4. CENA 3D ESPECÍFICA DO LIVRO DE REGRAS (Aba "Livro de Regras")
+   4. LIVRO DE REGRAS 3D REALISTA COM TEXTURA DE COURO, GRAVURAS E CADEADO 3D
    ========================================================================= */
 
 class TabBook3DScene {
   constructor(containerEl, onUnlockedCallback) {
     this.container = containerEl;
     this.onUnlocked = onUnlockedCallback;
-    this.width = containerEl.clientWidth;
-    this.height = containerEl.clientHeight;
+    this.width = containerEl.clientWidth || 800;
+    this.height = containerEl.clientHeight || 560;
     this.isUnlocking = false;
 
     this.scene = new THREE.Scene();
@@ -1405,52 +1694,169 @@ class TabBook3DScene {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.container.appendChild(this.renderer.domElement);
 
-    const amb = new THREE.AmbientLight(0xFFFFFF, 1.2);
+    // Iluminação nobre para destacar o couro e dourado
+    const amb = new THREE.AmbientLight(0xFFFFFF, 1.4);
     this.scene.add(amb);
-    const dir = new THREE.DirectionalLight(0xE4C37F, 2.5);
-    dir.position.set(5, 7, 6);
-    this.scene.add(dir);
+    const goldDir = new THREE.DirectionalLight(0xE4C37F, 3.2);
+    goldDir.position.set(6, 8, 7);
+    this.scene.add(goldDir);
+    const blueRim = new THREE.DirectionalLight(0x22D3EE, 1.8);
+    blueRim.position.set(-6, -4, 5);
+    this.scene.add(blueRim);
 
     this.createBook();
     this.animate();
   }
 
+  // Gera capa de couro nobre com brasão dourado em Canvas 2D
+  createCoverTexture() {
+    const c = document.createElement('canvas');
+    c.width = 512; c.height = 700;
+    const ctx = c.getContext('2d');
+
+    // Fundo de couro azul-meia-noite profundo
+    ctx.fillStyle = '#0B1220';
+    ctx.fillRect(0, 0, 512, 700);
+
+    // Textura sutil de couro
+    for (let i = 0; i < 3000; i++) {
+      ctx.fillStyle = Math.random() > 0.5 ? 'rgba(255,255,255,0.015)' : 'rgba(0,0,0,0.04)';
+      ctx.fillRect(Math.random() * 512, Math.random() * 700, 2, 2);
+    }
+
+    // Moldura Dourada Lavrada
+    ctx.strokeStyle = '#E4C37F';
+    ctx.lineWidth = 6;
+    ctx.strokeRect(30, 30, 452, 640);
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(42, 42, 428, 616);
+
+    // Cantoneiras ornamentadas
+    const drawCorner = (x, y) => {
+      ctx.fillStyle = '#E4C37F';
+      ctx.beginPath();
+      ctx.arc(x, y, 14, 0, Math.PI * 2);
+      ctx.fill();
+    };
+    drawCorner(30, 30); drawCorner(482, 30); drawCorner(30, 670); drawCorner(482, 670);
+
+    // Brasão Central
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#E4C37F';
+    ctx.font = 'bold 24px Cinzel, serif';
+    ctx.fillText('OCTAFIN', 256, 190);
+
+    ctx.font = 'bold 32px Cinzel, serif';
+    ctx.fillText('CÓDIGO DE CONDUTA', 256, 260);
+
+    ctx.font = '600 16px "Plus Jakarta Sans", sans-serif';
+    ctx.fillStyle = '#CBD5E1';
+    ctx.fillText('DIRETRIZES & REGRAS DO COMITÊ', 256, 305);
+
+    // Emblema geométrico sagrado
+    ctx.strokeStyle = '#E4C37F';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(256, 420, 55, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(256, 345); ctx.lineTo(256, 495);
+    ctx.moveTo(181, 420); ctx.lineTo(331, 420);
+    ctx.stroke();
+
+    ctx.font = 'bold 12px "Plus Jakarta Sans", sans-serif';
+    ctx.fillStyle = '#94A3B8';
+    ctx.fillText('EDIÇÃO OFICIAL CORPORATIVA', 256, 590);
+
+    return new THREE.CanvasTexture(c);
+  }
+
   createBook() {
     this.bookGroup = new THREE.Group();
-    const w = 3.6, h = 4.8, d = 0.65;
+    const w = 3.6, h = 4.8, d = 0.68;
 
-    const pGeo = new THREE.BoxGeometry(w * 0.94, h * 0.96, d * 0.85);
-    const pMat = new THREE.MeshStandardMaterial({ color: 0xE8DEC4, roughness: 0.9 });
+    // Páginas internas com corte dourado brilhante
+    const pGeo = new THREE.BoxGeometry(w * 0.94, h * 0.96, d * 0.86);
+    const pMat = new THREE.MeshStandardMaterial({
+      color: 0xE8DEC4,
+      roughness: 0.7,
+      metalness: 0.15
+    });
     this.pages = new THREE.Mesh(pGeo, pMat);
     this.bookGroup.add(this.pages);
 
-    const cMat = new THREE.MeshStandardMaterial({ color: 0x0E1726, metalness: 0.3, roughness: 0.4 });
-    const back = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.08), cMat);
+    // Material de couro dourado da capa
+    const coverTex = this.createCoverTexture();
+    const coverMat = new THREE.MeshStandardMaterial({
+      map: coverTex,
+      metalness: 0.45,
+      roughness: 0.35
+    });
+
+    const plainCoverMat = new THREE.MeshStandardMaterial({
+      color: 0x0B1220,
+      metalness: 0.45,
+      roughness: 0.35
+    });
+
+    // Capa Traseira e Lombada
+    const back = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.08), plainCoverMat);
     back.position.set(0, 0, -d * 0.45);
     this.bookGroup.add(back);
 
-    const spine = new THREE.Mesh(new THREE.BoxGeometry(0.12, h, d), cMat);
+    const spine = new THREE.Mesh(new THREE.BoxGeometry(0.14, h, d), plainCoverMat);
     spine.position.set(-w * 0.5, 0, 0);
     this.bookGroup.add(spine);
 
+    // Dobradiça da capa dianteira
     this.hinge = new THREE.Group();
     this.hinge.position.set(-w * 0.5, 0, d * 0.45);
 
-    const front = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.08), cMat);
+    const frontMaterials = [
+      plainCoverMat, plainCoverMat, plainCoverMat, plainCoverMat,
+      coverMat, // Face frontal com arte completa
+      plainCoverMat
+    ];
+    const front = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.08), frontMaterials);
     front.position.set(w * 0.5, 0, 0);
     this.hinge.add(front);
 
     this.bookGroup.add(this.hinge);
 
-    this.lock = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.55, 0.55, 0.25, 24),
-      new THREE.MeshStandardMaterial({ color: 0xD4AF37, metalness: 0.85, roughness: 0.2 })
-    );
-    this.lock.rotation.x = Math.PI / 2;
-    this.lock.position.set(w * 0.48, 0, 0.45);
-    this.bookGroup.add(this.lock);
+    // CADEADO 3D REALISTA (Corpo de latão maciço + Manilha curva metálica)
+    this.lockGroup = new THREE.Group();
+    this.lockGroup.position.set(w * 0.46, 0, d * 0.48);
 
-    this.bookGroup.rotation.set(0.2, -0.28, 0.05);
+    const lockBrassMat = new THREE.MeshStandardMaterial({
+      color: 0xE4C37F,
+      metalness: 0.85,
+      roughness: 0.25
+    });
+
+    // Corpo do cadeado
+    const lockBody = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.6, 0.22), lockBrassMat);
+    this.lockGroup.add(lockBody);
+
+    // Fechadura escura
+    const keyhole = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.06, 0.06, 0.24, 12),
+      new THREE.MeshBasicMaterial({ color: 0x0B0F19 })
+    );
+    keyhole.rotation.x = Math.PI / 2;
+    keyhole.position.set(0, -0.05, 0.01);
+    this.lockGroup.add(keyhole);
+
+    // Manilha de arco curvo em aço
+    const shackleGeo = new THREE.TorusGeometry(0.24, 0.06, 16, 24, Math.PI);
+    const shackleMat = new THREE.MeshStandardMaterial({ color: 0xD1D5DB, metalness: 0.95, roughness: 0.2 });
+    this.shackle = new THREE.Mesh(shackleGeo, shackleMat);
+    this.shackle.position.set(0, 0.28, 0);
+    this.lockGroup.add(this.shackle);
+
+    this.bookGroup.add(this.lockGroup);
+
+    this.bookGroup.rotation.set(0.18, -0.26, 0.04);
     this.scene.add(this.bookGroup);
   }
 
@@ -1464,16 +1870,20 @@ class TabBook3DScene {
       const p = Math.min(1, (now - start) / 2200);
 
       this.camera.position.z = 8.5 - Math.sin(p * Math.PI * 0.5) * 2.2;
+
+      // Animação da manilha e cadeado abrindo
       if (p < 0.4) {
-        this.lock.position.z = 0.45 + p * 2.0;
-        this.lock.rotation.z = p * 2;
+        this.shackle.position.y = 0.28 + p * 0.4;
+        this.shackle.rotation.y = p * 1.5;
+        this.lockGroup.position.z = 0.35 + p * 2.5;
       } else {
-        this.lock.visible = false;
+        this.lockGroup.visible = false;
       }
 
-      if (p > 0.3) {
-        const p2 = (p - 0.3) / 0.7;
-        this.hinge.rotation.y = -Math.pow(p2, 2.2) * (Math.PI * 0.85);
+      // Abertura majestosa da capa
+      if (p > 0.35) {
+        const p2 = (p - 0.35) / 0.65;
+        this.hinge.rotation.y = -Math.pow(p2, 2.0) * (Math.PI * 0.88);
       }
 
       if (p < 1) requestAnimationFrame(anim);
@@ -1485,7 +1895,8 @@ class TabBook3DScene {
   animate() {
     requestAnimationFrame(() => this.animate());
     if (!this.isUnlocking) {
-      this.bookGroup.position.y = Math.sin(Date.now() * 0.002) * 0.12;
+      this.bookGroup.position.y = Math.sin(Date.now() * 0.0018) * 0.12;
+      this.bookGroup.rotation.y = -0.26 + Math.cos(Date.now() * 0.0012) * 0.04;
     }
     this.renderer.render(this.scene, this.camera);
   }
@@ -1578,7 +1989,7 @@ function renderSidebar() {
     }
     const hasActive = state.records.find(r => r.type === 'reuniao' && r.status === 'votacao');
     if (hasActive) {
-      showToast('⚠️ Já existe uma sessão em andamento!');
+      showToast('⚠️ Já existe uma reunião aberta!');
       state.activeTab = 'reunioes';
       state.openMeetingId = hasActive.id;
       renderApp();
@@ -1596,14 +2007,20 @@ function renderRibbon() {
     ribbonSlot.innerHTML = `
       <div class="ribbon-live">
         <span class="pulse-dot"></span>
-        <span>Sessão em votação aberta — <b>Ata Nº ${String(activeM.numero).padStart(3, '0')}</b> por ${escapeHtml(activeM.requester)}</span>
-        <button class="btn-ribbon-enter" id="btn-enter-room">Entrar na Sala &rarr;</button>
+        <span>Reunião em votação aberta — <b>Ata Nº ${String(activeM.numero).padStart(3, '0')}</b> por ${escapeHtml(activeM.requester)}</span>
+        <div class="ribbon-actions">
+          <button class="btn-ribbon-enter" id="btn-enter-room">Entrar na Sala &rarr;</button>
+          <button class="btn-ribbon-close" id="btn-ribbon-close-meeting">🔴 Encerrar Reunião</button>
+        </div>
       </div>
     `;
     document.getElementById('btn-enter-room').onclick = () => {
       state.activeTab = 'reunioes';
       state.openMeetingId = activeM.id;
       renderApp();
+    };
+    document.getElementById('btn-ribbon-close-meeting').onclick = () => {
+      promptCloseMeeting(activeM.id);
     };
   } else {
     ribbonSlot.innerHTML = '';
@@ -1634,8 +2051,8 @@ function renderPlacar(container) {
   const sorted = [...state.employees].sort((a, b) => b.points - a.points);
   container.innerHTML = `
     <div class="page-header">
-      <h1>Placar Geral 3D</h1>
-      <p>Ranking em tempo real com profundidade tridimensional. Passe o mouse sobre os cards para interagir.</p>
+      <h1>Placar Geral</h1>
+      <p>Saldo de pontos de conduta e excelência corporativa da equipe Octafin.</p>
     </div>
     <div class="leaderboard">
       ${sorted.map((emp, idx) => `
@@ -1653,13 +2070,13 @@ function renderPlacar(container) {
   `;
 }
 
-/* 2. Reuniões 3D */
+/* 2. Reuniões 3D com Botão Direto de Encerramento */
 function renderReunioes(container) {
   const meetings = state.records.filter(r => r.type === 'reuniao').sort((a, b) => b.createdAt - a.createdAt);
   container.innerHTML = `
     <div class="page-header">
       <h1>Reuniões & Votação</h1>
-      <p>Sessões ativas e deliberações com cartas tridimensionais.</p>
+      <p>Sessões ativas, deliberações e apuração por quórum do comitê.</p>
     </div>
     ${meetings.length === 0 ? '<div style="text-align:center;padding:50px;color:var(--text-muted);">Nenhuma reunião registrada ainda.</div>' : `
       <div class="meetings-list">
@@ -1667,9 +2084,16 @@ function renderReunioes(container) {
           <div class="meeting-card tilt-3d-card" data-mid="${m.id}">
             <div class="card-top pop-layer-2">
               <span class="card-ata-no">ATA Nº ${String(m.numero).padStart(3, '0')}</span>
-              <span class="badge-status ${m.status === 'votacao' ? 'votacao' : m.result}">
-                ${m.status === 'votacao' ? '● Em Votação' : m.result === 'culpado' ? 'Culpado' : 'Inocente'}
-              </span>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span class="badge-status ${m.status === 'votacao' ? 'votacao' : (m.result || 'cancelada')}">
+                  ${m.status === 'votacao' ? '● Em Votação' : m.result === 'culpado' ? 'Culpado' : m.result === 'inocente' ? 'Inocente' : 'Cancelada'}
+                </span>
+                ${m.status === 'votacao' ? `
+                  <button class="btn-quick-close" onclick="event.stopPropagation(); promptCloseMeeting('${m.id}')">
+                    🔴 Encerrar Reunião
+                  </button>
+                ` : ''}
+              </div>
             </div>
             <div class="card-reason pop-layer-1">${escapeHtml(m.reason)}</div>
             <div class="card-meta pop-layer-1">
@@ -1683,7 +2107,7 @@ function renderReunioes(container) {
     `}
   `;
 
-  container.querySelectorAll('.meeting-card').forEach(card => {
+  container.querySelectorAll('.meeting-card[data-mid]').forEach(card => {
     card.onclick = () => {
       state.openMeetingId = card.dataset.mid;
       renderApp();
@@ -1691,17 +2115,16 @@ function renderReunioes(container) {
   });
 }
 
-/* 3. Sala da Ata */
+/* 3. Sala da Ata com Botão de Encerramento Proeminente */
 function renderAtaRoom(container, m) {
   const isRequester = state.me === m.requester;
   const isAccused = state.me === m.accused;
-  const myVote = m.votes[state.me];
-  const votesList = Object.values(m.votes);
+  const myVote = m.votes ? m.votes[state.me] : null;
+  const votesList = Object.values(m.votes || {});
   const totalVotes = votesList.length;
   const guiltyVotes = votesList.filter(v => v === 'culpado').length;
   const innocentVotes = votesList.filter(v => v === 'inocente').length;
   const eligibleVoters = state.employees.filter(e => e.name !== m.accused).length;
-  const quorumMet = totalVotes >= state.settings.quorumMinimo;
 
   container.innerHTML = `
     <button class="btn-back-link" id="btn-back-meetings">&larr; Voltar para Reuniões</button>
@@ -1711,22 +2134,43 @@ function renderAtaRoom(container, m) {
           <h2>Ata Nº ${String(m.numero).padStart(3, '0')}</h2>
           <div class="ata-date">Aberta por ${escapeHtml(m.requester)} &middot; ${new Date(m.createdAt).toLocaleString('pt-BR')}</div>
         </div>
-        <span class="badge-status ${m.status === 'votacao' ? 'votacao' : m.result}">
-          ${m.status === 'votacao' ? '● Em Votação' : m.result === 'culpado' ? 'Culpado' : 'Inocente'}
+        <span class="badge-status ${m.status === 'votacao' ? 'votacao' : (m.result || 'cancelada')}">
+          ${m.status === 'votacao' ? '● Em Votação' : m.result === 'culpado' ? 'Culpado' : m.result === 'inocente' ? 'Inocente' : 'Cancelada'}
         </span>
       </div>
+
+      <!-- PAINEL DE ENCERRAMENTO E CONTROLE DA REUNIÃO -->
+      ${m.status === 'votacao' ? `
+        <div class="meeting-control-panel pop-layer-2">
+          <div class="control-info">
+            <div class="control-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Controle da Sessão
+            </div>
+            <div class="control-sub">Finalize e apure os votos do comitê ou cancele esta sessão.</div>
+          </div>
+          <div class="control-actions">
+            <button class="btn-close-meeting-danger" id="btn-room-close-meeting">
+              🔴 Encerrar Reunião e Apurar
+            </button>
+            <button class="btn-cancel-meeting-soft" id="btn-room-cancel-meeting">
+              Cancelar Reunião
+            </button>
+          </div>
+        </div>
+      ` : ''}
 
       <div class="accused-banner pop-layer-1">
         <div class="avatar lg">${getInitials(m.accused)}</div>
         <div class="accused-info">
-          <label>Convocado(a)</label>
+          <label>Colaborador Convocado</label>
           <h3>${escapeHtml(m.accused)}</h3>
         </div>
       </div>
 
       <div class="reason-callout pop-layer-1">${escapeHtml(m.reason)}</div>
 
-      <!-- Debate Bilateral Exclusivo -->
+      <!-- Debate Bilateral -->
       <div class="chat-box pop-layer-1">
         <div class="chat-box-title">Debate da Sessão</div>
         <div class="chat-box-desc">
@@ -1750,7 +2194,7 @@ function renderAtaRoom(container, m) {
         ` : ''}
       </div>
 
-      <!-- Área de Voto & Encerramento -->
+      <!-- Área de Voto & Resultado -->
       <div class="voting-zone pop-layer-1">
         ${m.status === 'votacao' ? `
           ${isAccused ? `
@@ -1778,46 +2222,46 @@ function renderAtaRoom(container, m) {
               <div class="vote-progress-fill" style="width:${Math.min(100, (totalVotes / Math.max(1, eligibleVoters)) * 100)}%;"></div>
             </div>
           </div>
-
-          ${isRequester ? `
-            <div style="margin-top:20px;">
-              <button class="btn-action-primary" id="btn-close-session" ${quorumMet ? '' : 'disabled style="opacity:0.4;cursor:not-allowed;"'}>
-                Encerrar Votação e Apurar Resultados
-              </button>
-              ${!quorumMet ? `<p style="font-size:12px;color:var(--brand);margin-top:6px;">Quórum mínimo de ${state.settings.quorumMinimo} votos necessário.</p>` : ''}
-            </div>
-          ` : ''}
         ` : `
           <!-- Sessão Encerrada -->
-          <div class="verdict-banner ${m.result}">
-            <h3>${m.result === 'culpado' ? 'Veredito: CULPADO' : 'Veredito: INOCENTE'}</h3>
-            <p>${m.result === 'culpado' ? `${escapeHtml(m.accused)} perdeu ${Math.abs(m.pointsChange)} pontos.` : `Nenhum ponto retirado.`}</p>
+          <div class="verdict-banner ${m.result || 'cancelada'}">
+            <h3>${m.result === 'culpado' ? 'Veredito: CULPADO' : m.result === 'inocente' ? 'Veredito: INOCENTE' : 'Sessão Cancelada'}</h3>
+            <p>${m.result === 'culpado' ? `${escapeHtml(m.accused)} perdeu ${Math.abs(m.pointsChange || 10)} pontos no placar.` : m.result === 'inocente' ? `Nenhum ponto retirado.` : 'Reunião cancelada sem alteração de pontuação.'}</p>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;">
             <div style="background:rgba(255,255,255,0.04);padding:14px;border-radius:var(--radius);">
-              <div style="font-size:12px;color:var(--red);">CULPADO</div>
+              <div style="font-size:12px;color:var(--red);">VOTOS CULPADO</div>
               <div style="font-size:24px;font-weight:800;color:#fff;">${guiltyVotes}</div>
             </div>
             <div style="background:rgba(255,255,255,0.04);padding:14px;border-radius:var(--radius);">
-              <div style="font-size:12px;color:var(--green);">INOCENTE</div>
+              <div style="font-size:12px;color:var(--green);">VOTOS INOCENTE</div>
               <div style="font-size:24px;font-weight:800;color:#fff;">${innocentVotes}</div>
             </div>
           </div>
-          <div style="border-top:1px solid var(--border);padding-top:14px;">
-            <div style="font-size:12px;font-weight:700;color:var(--text-faint);text-transform:uppercase;margin-bottom:10px;">Votos Individuais</div>
-            ${Object.keys(m.votes).map(v => `
-              <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13.5px;">
-                <span>${escapeHtml(v)}</span>
-                <span class="badge-status ${m.votes[v]}">${m.votes[v] === 'culpado' ? 'Culpado' : 'Inocente'}</span>
-              </div>
-            `).join('')}
-          </div>
+          ${m.votes && Object.keys(m.votes).length > 0 ? `
+            <div style="border-top:1px solid var(--border);padding-top:14px;">
+              <div style="font-size:12px;font-weight:700;color:var(--text-faint);text-transform:uppercase;margin-bottom:10px;">Votos Individuais Apurados</div>
+              ${Object.keys(m.votes).map(v => `
+                <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13.5px;">
+                  <span>${escapeHtml(v)}</span>
+                  <span class="badge-status ${m.votes[v]}">${m.votes[v] === 'culpado' ? 'Culpado' : 'Inocente'}</span>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
         `}
       </div>
     </div>
   `;
 
   document.getElementById('btn-back-meetings').onclick = () => { state.openMeetingId = null; renderApp(); };
+
+  const btnClose = document.getElementById('btn-room-close-meeting');
+  if (btnClose) btnClose.onclick = () => promptCloseMeeting(m.id);
+
+  const btnCancel = document.getElementById('btn-room-cancel-meeting');
+  if (btnCancel) btnCancel.onclick = () => promptCancelMeeting(m.id);
+
   const vC = document.getElementById('btn-vote-culpado');
   if (vC) vC.onclick = () => castVote(m.id, 'culpado');
   const vI = document.getElementById('btn-vote-inocente');
@@ -1838,9 +2282,6 @@ function renderAtaRoom(container, m) {
     btnSendChat.onclick = handleSend;
     chatInput.onkeydown = (e) => { if (e.key === 'Enter') handleSend(); };
   }
-
-  const btnClose = document.getElementById('btn-close-session');
-  if (btnClose && quorumMet) btnClose.onclick = () => closeMeetingSession(m.id);
 }
 
 /* 4. Livro de Regras 3D (Aba Dedicada) */
@@ -1880,28 +2321,30 @@ function renderLivroView(container) {
         <p>Clique no botão para destrancar a animação 3D ou abra o leitor direto.</p>
       </div>
       <div class="book-stage-wrapper">
-        <div class="book-3d-canvas-mount" id="book-canvas-slot"></div>
+        <div class="book-3d-canvas-mount" id="book-canvas-container"></div>
         <div class="book-overlay-ui">
-          <button class="btn-unlock-book-tab" id="btn-trigger-unlock-tab">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          <button class="btn-unlock-book-tab" id="btn-unlock-book-trigger">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
             Destrancar e Abrir Livro 3D
           </button>
-          <button class="btn-action-primary" id="btn-open-reader-direct" style="background:rgba(255,255,255,0.12);color:#fff;">Abrir Leitor Pautado &rarr;</button>
+          <button class="btn-reader-nav" id="btn-open-reader-direct" style="background:rgba(0,0,0,0.6);border-color:var(--border);">
+            Abrir Leitor Pautado &rarr;
+          </button>
         </div>
       </div>
     `;
 
-    setTimeout(() => {
-      const mount = document.getElementById('book-canvas-slot');
-      if (mount) {
-        if (tabBookSceneInstance) tabBookSceneInstance.destroy();
-        tabBookSceneInstance = new TabBook3DScene(mount, () => {
-          setTimeout(() => { state.readerMode = true; renderApp(); }, 600);
-        });
-      }
-    }, 40);
+    const mount = document.getElementById('book-canvas-container');
+    if (tabBookSceneInstance) {
+      tabBookSceneInstance.destroy();
+    }
+    tabBookSceneInstance = new TabBook3DScene(mount, () => {
+      state.readerMode = true;
+      state.readerPageIndex = 0;
+      renderApp();
+    });
 
-    document.getElementById('btn-trigger-unlock-tab').onclick = () => {
+    document.getElementById('btn-unlock-book-trigger').onclick = () => {
       if (tabBookSceneInstance) tabBookSceneInstance.unlockBook();
     };
     document.getElementById('btn-open-reader-direct').onclick = () => {
@@ -1911,24 +2354,22 @@ function renderLivroView(container) {
   }
 }
 
-/* 5. Histórico 3D */
+/* 5. Histórico */
 function renderHistorico(container) {
-  const records = state.records.filter(r => (r.type === 'reuniao' && r.status === 'encerrada') || r.type === 'ajuste')
-    .sort((a, b) => (b.closedAt || b.createdAt) - (a.closedAt || a.createdAt));
-
+  const records = [...state.records].sort((a, b) => (b.closedAt || b.createdAt) - (a.closedAt || a.createdAt));
   container.innerHTML = `
     <div class="page-header">
-      <h1>Histórico de Vereditos</h1>
-      <p>Todas as decisões passadas registradas de forma auditável.</p>
+      <h1>Histórico & Auditoria</h1>
+      <p>Registro imutável de deliberações, votos e penalidades.</p>
     </div>
-    ${records.length === 0 ? '<div style="text-align:center;padding:50px;color:var(--text-muted);">Nenhum histórico ainda.</div>' : `
+    ${records.length === 0 ? '<div style="text-align:center;padding:50px;color:var(--text-muted);">Nenhum registro no histórico.</div>' : `
       <div class="meetings-list">
         ${records.map(r => `
           <div class="meeting-card tilt-3d-card" ${r.type === 'reuniao' ? `data-mid="${r.id}"` : ''}>
             <div class="card-top pop-layer-2">
-              <span class="card-ata-no">${r.type === 'reuniao' ? `ATA Nº ${String(r.numero).padStart(3, '0')}` : 'Ajuste Manual'}</span>
-              <span class="badge-status ${r.type === 'reuniao' ? r.result : (r.delta >= 0 ? 'inocente' : 'culpado')}">
-                ${r.type === 'reuniao' ? (r.result === 'culpado' ? `Culpado (${r.pointsChange} pts)` : 'Inocente') : (r.delta >= 0 ? `+${r.delta} pts` : `${r.delta} pts`)}
+              <span class="card-ata-no">${r.type === 'reuniao' ? `ATA Nº ${String(r.numero).padStart(3, '0')}` : 'AJUSTE MANUAL'}</span>
+              <span class="badge-status ${r.type === 'reuniao' ? (r.status === 'votacao' ? 'votacao' : (r.result || 'cancelada')) : (r.delta < 0 ? 'culpado' : 'inocente')}">
+                ${r.type === 'reuniao' ? (r.status === 'votacao' ? '● Em Votação' : r.result === 'culpado' ? 'Culpado' : r.result === 'inocente' ? 'Inocente' : 'Cancelada') : (r.delta > 0 ? `+${r.delta} pts` : `${r.delta} pts`)}
               </span>
             </div>
             <div class="card-reason pop-layer-1">${escapeHtml(r.type === 'reuniao' ? r.reason : r.motivo)}</div>
@@ -1953,7 +2394,7 @@ function renderConfig(container) {
   container.innerHTML = `
     <div class="page-header">
       <h1>Configurações</h1>
-      <p>Ajustes administrativos do comitê.</p>
+      <p>Ajustes administrativos do comitê e gestão de membros.</p>
     </div>
 
     <div class="config-card tilt-3d-card">
@@ -1975,7 +2416,7 @@ function renderConfig(container) {
     </div>
 
     <div class="config-card tilt-3d-card">
-      <h3 class="pop-layer-2">Colaboradores</h3>
+      <h3 class="pop-layer-2">Colaboradores Octafin</h3>
       <div style="display:flex;gap:10px;margin-bottom:14px;margin-top:10px;" class="pop-layer-1">
         <input type="text" id="new-emp-name-input" placeholder="Nome do novo colaborador..." style="flex:1;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:var(--radius-sm);color:#fff;">
         <button class="btn-action-primary" id="btn-add-emp">Adicionar</button>
@@ -1992,7 +2433,7 @@ function renderConfig(container) {
     </div>
 
     <div class="config-card tilt-3d-card">
-      <h3 class="pop-layer-2">Ajuste Manual</h3>
+      <h3 class="pop-layer-2">Ajuste Manual de Pontuação</h3>
       <div class="grid-2 pop-layer-1">
         <div class="input-field">
           <label>Colaborador</label>
@@ -2050,7 +2491,7 @@ function renderConfig(container) {
 }
 
 /* =========================================================================
-   6. AÇÕES & MODAIS
+   6. AÇÕES, VOTAÇÃO & ENCERRAMENTO DE REUNIÃO
    ========================================================================= */
 
 async function castVote(mid, vote) {
@@ -2064,12 +2505,28 @@ async function castVote(mid, vote) {
   renderApp();
 }
 
+function promptCloseMeeting(mid) {
+  const m = state.records.find(r => r.id === mid);
+  if (!m) return;
+  state.currentModal = { type: 'confirm_close', mid };
+  renderModals();
+}
+
+function promptCancelMeeting(mid) {
+  const m = state.records.find(r => r.id === mid);
+  if (!m) return;
+  state.currentModal = { type: 'confirm_cancel', mid };
+  renderModals();
+}
+
 async function closeMeetingSession(mid) {
   const m = state.records.find(r => r.id === mid);
   if (!m || m.status !== 'votacao') return;
   const votes = Object.values(m.votes || {});
   const guilty = votes.filter(v => v === 'culpado').length;
-  const isGuilty = (guilty / votes.length) >= (state.settings.percentualMaioria / 100);
+  const total = votes.length;
+
+  const isGuilty = total > 0 ? (guilty / total) >= (state.settings.percentualMaioria / 100) : false;
 
   m.status = 'encerrada';
   m.closedAt = Date.now();
@@ -2082,8 +2539,23 @@ async function closeMeetingSession(mid) {
     m.result = 'inocente';
     m.pointsChange = 0;
   }
+
   await Promise.all([storageSet('records', state.records, true), storageSet('employees', state.employees, true)]);
-  showToast('Sessão finalizada!');
+  showToast('Reunião encerrada e veredito publicado!');
+  state.currentModal = null;
+  renderApp();
+}
+
+async function cancelMeetingSession(mid) {
+  const m = state.records.find(r => r.id === mid);
+  if (!m || m.status !== 'votacao') return;
+  m.status = 'cancelada';
+  m.closedAt = Date.now();
+  m.result = 'cancelada';
+  m.pointsChange = 0;
+  await storageSet('records', state.records, true);
+  showToast('Reunião cancelada sem penalidades.');
+  state.currentModal = null;
   renderApp();
 }
 
@@ -2119,6 +2591,68 @@ function renderModals() {
     return;
   }
 
+  // MODAL DE ENCERRAMENTO DE REUNIÃO
+  if (typeof state.currentModal === 'object' && state.currentModal.type === 'confirm_close') {
+    const mid = state.currentModal.mid;
+    const m = state.records.find(r => r.id === mid);
+    const votes = Object.values(m.votes || {});
+    const guilty = votes.filter(v => v === 'culpado').length;
+    const innocent = votes.filter(v => v === 'inocente').length;
+
+    modalSlot.innerHTML = `
+      <div class="modal-backdrop">
+        <div class="modal-panel tilt-3d-card">
+          <h2 class="pop-layer-2">Encerrar Reunião</h2>
+          <p class="sub pop-layer-1">Deseja finalizar a <b>Ata Nº ${String(m.numero).padStart(3, '0')}</b> e apurar o resultado agora?</p>
+
+          <div style="background:rgba(255,255,255,0.04);padding:16px;border-radius:var(--radius);margin-bottom:18px;" class="pop-layer-1">
+            <div style="font-size:13px;color:var(--text-muted);margin-bottom:8px;">Votos coletados até o momento: <b>${votes.length}</b></div>
+            <div style="display:flex;gap:12px;">
+              <span style="color:var(--red);font-weight:700;font-size:14px;">Culpado: ${guilty}</span>
+              <span style="color:var(--green);font-weight:700;font-size:14px;">Inocente: ${innocent}</span>
+            </div>
+            ${votes.length < state.settings.quorumMinimo ? `
+              <p style="font-size:12px;color:var(--gold);margin-top:8px;">⚠️ O quórum ideal é de ${state.settings.quorumMinimo} votos. Finalizar agora apurará com os votos existentes.</p>
+            ` : ''}
+          </div>
+
+          <div class="modal-actions pop-layer-1">
+            <button class="btn-modal-cancel" id="btn-cancel-close-modal">Continuar Votando</button>
+            <button class="btn-close-meeting-danger" id="btn-confirm-close-modal">Finalizar e Apurar Veredito</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('btn-cancel-close-modal').onclick = () => { state.currentModal = null; renderModals(); };
+    document.getElementById('btn-confirm-close-modal').onclick = () => closeMeetingSession(mid);
+    return;
+  }
+
+  // MODAL DE CANCELAMENTO DE REUNIÃO
+  if (typeof state.currentModal === 'object' && state.currentModal.type === 'confirm_cancel') {
+    const mid = state.currentModal.mid;
+    const m = state.records.find(r => r.id === mid);
+
+    modalSlot.innerHTML = `
+      <div class="modal-backdrop">
+        <div class="modal-panel tilt-3d-card">
+          <h2 class="pop-layer-2">Cancelar Reunião</h2>
+          <p class="sub pop-layer-1">Tem certeza que deseja cancelar a <b>Ata Nº ${String(m.numero).padStart(3, '0')}</b>? Nenhuma penalidade será aplicada.</p>
+          <div class="modal-actions pop-layer-1">
+            <button class="btn-modal-cancel" id="btn-abort-cancel-modal">Voltar</button>
+            <button class="btn-cancel-meeting-soft" id="btn-confirm-cancel-modal" style="color:var(--red);border-color:rgba(248,113,113,0.4);">Confirmar Cancelamento</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('btn-abort-cancel-modal').onclick = () => { state.currentModal = null; renderModals(); };
+    document.getElementById('btn-confirm-cancel-modal').onclick = () => cancelMeetingSession(mid);
+    return;
+  }
+
+  // MODAL DE LOGIN CORPORATIVO
   if (state.currentModal === 'login') {
     modalSlot.innerHTML = `
       <div class="modal-backdrop">
@@ -2173,7 +2707,7 @@ function renderModals() {
       <div class="modal-backdrop">
         <div class="modal-panel tilt-3d-card">
           <h2 class="pop-layer-2">Acionar Reunião</h2>
-          <p class="sub pop-layer-1">Selecione quem cometeu o erro e relate os fatos.</p>
+          <p class="sub pop-layer-1">Selecione quem cometeu a falha e relate os fatos.</p>
           <div class="input-field pop-layer-1" style="margin-bottom:14px;">
             <label>Quem cometeu a falha?</label>
             <select id="ac-accused-select">
@@ -2187,7 +2721,7 @@ function renderModals() {
           </div>
           <div class="modal-actions pop-layer-1">
             <button class="btn-modal-cancel" id="btn-cancel-ac">Cancelar</button>
-            <button class="btn-action-primary" id="btn-confirm-ac">Abrir Sessão</button>
+            <button class="btn-action-primary" id="btn-confirm-ac">Abrir Reunião</button>
           </div>
         </div>
       </div>
@@ -2206,19 +2740,91 @@ function renderModals() {
       state.currentModal = null;
       state.activeTab = 'reunioes';
       state.openMeetingId = newM.id;
-      showToast('Sessão aberta!');
+      showToast('Reunião aberta!');
       renderApp();
     };
   }
 }
 
 /* =========================================================================
-   7. INICIALIZAÇÃO
+   7. SISTEMA DE TILT 3D ULTRA OTIMIZADO (ZERO LAG / 120 FPS)
+   ========================================================================= */
+
+function initUltraSmooth3DTilt() {
+  let activeCard = null;
+  let cachedRect = null;
+  let targetRx = 0, targetRy = 0;
+  let currentRx = 0, currentRy = 0;
+  let isHovering = false;
+
+  document.addEventListener('mousemove', (e) => {
+    const card = e.target.closest('.tilt-3d-card');
+    if (card !== activeCard) {
+      if (activeCard) {
+        activeCard.classList.remove('is-tilting');
+        activeCard.style.setProperty('--rx', '0deg');
+        activeCard.style.setProperty('--ry', '0deg');
+      }
+      activeCard = card;
+      if (activeCard) {
+        cachedRect = activeCard.getBoundingClientRect();
+        activeCard.classList.add('is-tilting');
+        isHovering = true;
+      } else {
+        isHovering = false;
+        cachedRect = null;
+      }
+    }
+
+    if (!activeCard || !cachedRect) return;
+
+    const x = e.clientX - cachedRect.left;
+    const y = e.clientY - cachedRect.top;
+    const halfW = cachedRect.width / 2;
+    const halfH = cachedRect.height / 2;
+
+    targetRx = -((y - halfH) / halfH) * 8.5;
+    targetRy = ((x - halfW) / halfW) * 8.5;
+  }, { passive: true });
+
+  window.addEventListener('scroll', () => {
+    if (activeCard) {
+      cachedRect = activeCard.getBoundingClientRect();
+    }
+  }, { passive: true });
+
+  document.addEventListener('mouseleave', () => {
+    if (activeCard) {
+      activeCard.classList.remove('is-tilting');
+      activeCard.style.setProperty('--rx', '0deg');
+      activeCard.style.setProperty('--ry', '0deg');
+      activeCard = null;
+      isHovering = false;
+    }
+  });
+
+  function renderTiltLoop() {
+    if (isHovering && activeCard) {
+      currentRx += (targetRx - currentRx) * 0.22;
+      currentRy += (targetRy - currentRy) * 0.22;
+      activeCard.style.setProperty('--rx', `${currentRx.toFixed(2)}deg`);
+      activeCard.style.setProperty('--ry', `${currentRy.toFixed(2)}deg`);
+    } else {
+      currentRx = 0; currentRy = 0;
+    }
+    requestAnimationFrame(renderTiltLoop);
+  }
+  renderTiltLoop();
+}
+
+/* =========================================================================
+   8. INICIALIZAÇÃO
    ========================================================================= */
 
 async function startSystem() {
   await loadData();
   new FullSpace3DUniverse();
+  initUltraSmooth3DTilt();
   renderApp();
 
   setInterval(async () => {
@@ -2229,7 +2835,7 @@ async function startSystem() {
       await loadData();
       renderApp();
     } catch (e) {}
-  }, 4000);
+  }, 5000);
 }
 
 window.addEventListener('DOMContentLoaded', startSystem);
