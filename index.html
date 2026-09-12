@@ -71,7 +71,7 @@
       if (stamp === lastStamp) return;
       if (typeof loadData !== 'function' || typeof renderApp !== 'function' || typeof state === 'undefined') return;
       const chatInput = document.getElementById('chat-text-input');
-      if (state.currentModal || state.welcomeOverlay || (chatInput && chatInput.value.trim())) return;
+      if (state.currentModal || state.welcomeOverlay || state.activeTab === 'config' || (chatInput && chatInput.value.trim())) return;
       await loadData();
       renderApp();
       lastStamp = stamp;
@@ -2919,7 +2919,7 @@ async function startSystem() {
   renderApp();
 
   setInterval(async () => {
-    if (state.currentModal || state.activeTab === 'livro' || state.welcomeOverlay) return;
+    if (state.currentModal || state.activeTab === 'livro' || state.activeTab === 'config' || state.welcomeOverlay) return;
     const chatInput = document.getElementById('chat-text-input');
     if (chatInput && chatInput.value.trim().length > 0) return;
     try {
